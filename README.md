@@ -11,7 +11,7 @@ pip install repo-classifier
 Or install from source:
 
 ```bash
-git clone https://github.com/YichaoXu/repo_classifier.git
+git clone https://github.com/samhsu-dev/repo_classifier.git
 cd repo_classifier
 pip install -e .
 ```
