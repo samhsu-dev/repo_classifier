@@ -6,15 +6,15 @@
 GitHub repositories vary widely in purpose and functionality. Classifying repositories into project types enables better discoverability, organization, and automated tooling. The challenge is determining accurate project types from repository metadata—specifically README content—using both fast heuristic and precise AI-powered approaches.
 
 **System Role**
-The Repository Classifier is a library that serves as the central classification engine, responsible for analyzing repository README content and mapping it to predefined project type taxonomies through configurable classification strategies.
+The Repository Classifier is a library that serves as the central classification engine, using a priority cascade to determine the most likely project type: Ground Truth → File Type Inference → Heuristic/AI methods.
 
 **Data Flow**
-- **Inputs:** Repository URL, classifier configuration, README content
+- **Inputs:** Repository URL, classifier configuration
 - **Outputs:** Confidence scores mapping project types to likelihood (0.0–1.0)
-- **Connections:** GitHub (data source) → ReadMe Retrieval → Classification Engine → Result Aggregation → External Consumer
+- **Connections:** Repository URL → Ground Truth Check → (if miss) → README Retrieval → Cascade Pipeline (File Type → Heuristic) → Result → External Consumer
 
 **Scope Boundaries**
-- **Owned:** Classification algorithms (heuristic and AI-based), classifier registry management, project type taxonomy, score normalization, ground truth validation
+- **Owned:** Ground truth validation, file-type inference, heuristic and AI classification algorithms, classifier registry management, project type taxonomy, score normalization
 - **Not Owned:** GitHub API integration details beyond README fetching, AI model training, repository metadata caching, result persistence
 
 
@@ -22,54 +22,42 @@ The Repository Classifier is a library that serves as the central classification
 
 **Conceptual Diagram**
 ```
-┌─────────────────┐
-│  Repository URL │
-└────────┬────────┘
+┌──────────────────┐
+│  Repository URL  │
+└────────┬─────────┘
          │
          ▼
-┌──────────────────────────┐
-│  README Retrieval        │
-│  (get_repo_readme)       │
-└────────┬─────────────────┘
-         │
-         ▼
-┌──────────────────────────────────┐
-│  Classification Strategy         │
-├──────────┬──────────────────────┤
-│ Heuristic│      AI-Powered      │
-│ (Keywords│  (LLM Analysis)      │
-│  Matching)│                      │
-└────────┬───────────┬────────────┘
-         │           │
-         ▼           ▼
-┌────────────────────────────┐
-│  Classifier Registry       │
-│  (Config Lookup)           │
-└────────┬───────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  Score Computation             │
-│  (Keywords vs Project Types)   │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────┐
-│  Result Aggregation        │
-│  (Top-N Selection)         │
-└────────┬───────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  Ground Truth Validation       │
-│  (If Available)                │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌──────────────────────────────┐
-│  Final Scores                │
-│  {ProjectType: Confidence}   │
-└──────────────────────────────┘
+    ┌────────────────────────────────┐
+    │ Ground Truth Check (Highest)   │
+    │ if found: return {type: 1.0}   │
+    └────────┬───────────────────────┘
+             │ (not found)
+             ▼
+    ┌──────────────────────────┐
+    │  README Retrieval        │
+    │  (get_repo_readme)       │
+    └────────┬─────────────────┘
+             │
+             ▼
+    ┌────────────────────────────────┐
+    │  File Type Inference           │
+    │  (Confident matches detected?) │
+    └────────┬───────────────────────┘
+             │ (score >= 0.7)
+             ├─────→ Return file-based type
+             │
+             │ (low confidence)
+             ▼
+    ┌────────────────────────────────┐
+    │  Heuristic Classification      │
+    │  (Keyword matching fallback)   │
+    └────────┬───────────────────────┘
+             │
+             ▼
+    ┌──────────────────────────────┐
+    │  Top-N Selection & Result    │
+    │  {ProjectType: Confidence}   │
+    └──────────────────────────────┘
 ```
 
 **Core Concepts**
@@ -98,6 +86,12 @@ The Repository Classifier is a library that serves as the central classification
 
 - **Top-N Selection** - Filtering mechanism that returns only the N highest-confidence project types, reducing noise and focusing results on the most likely classifications.
 
+- **File-Type Pattern** - A mapping from project types to lists of characteristic file names and path fragments (e.g., `composer.json`, `manage.py`, `package.json`). When these tokens appear in README text, they strongly suggest the corresponding project type. Patterns are language-specific and defined in the `predefine.file_patterns` module.
+
+- **Cascade Pipeline** - A priority-based classification strategy where methods are tried in order: Ground Truth (highest priority) → File Type Inference → Heuristic (fallback). Each stage either succeeds and returns a result, or defers to the next stage.
+
+- **Confidence Threshold** - A minimum confidence score (0.7) below which file-type inference defers to heuristic classification. If file inference produces a score >= threshold, that result is returned immediately without trying other methods.
+
 
 ## 3. Contracts & Flow
 
@@ -110,15 +104,16 @@ The Repository Classifier is a library that serves as the central classification
 
 **Internal Processing Flow**
 
-**Heuristic Classification Flow:**
+**Cascade Classification Flow:**
 1. **Input Validation** - Verify repository URL, classifier reference, and parameters are valid
-2. **README Retrieval** - Fetch README content from the GitHub repository
-3. **Classifier Lookup** - Resolve classifier name to configuration from registry (or use provided config directly)
-4. **Keyword Extraction & Matching** - Scan README for keywords; aggregate weights for each project type
-5. **Score Computation** - Compute raw scores from keyword weights
-6. **Score Normalization** - Normalize raw scores to 0.0–1.0 range
-7. **Top-N Filtering** - Select and return top N project types by confidence
-8. **Ground Truth Override** - If repo is in ground truth, return only the known type with confidence 1.0
+2. **Ground Truth Check** - If repository URL exists in ground truth registry, return known type with confidence 1.0 (avoids unnecessary network request)
+3. **README Retrieval** - Fetch README content from the GitHub repository (only if ground truth check fails)
+4. **Classifier Lookup** - Resolve classifier name to configuration from registry (or use provided config directly)
+5. **File Type Inference** - Scan README for file-name tokens; score project types by pattern matches
+6. **Threshold Decision** - If file-type score >= 0.7, return that result; otherwise proceed to heuristic
+7. **Heuristic Fallback** - Scan README for keywords; aggregate weights for each project type
+8. **Score Computation & Normalization** - Compute and normalize raw keyword scores to 0.0–1.0 range
+9. **Top-N Filtering** - Select and return top N project types by confidence
 
 **AI-Powered Classification Flow:**
 1. **Input Validation** - Verify all parameters (URL, API key, model, classifier)
@@ -164,6 +159,23 @@ The Repository Classifier is a library that serves as the central classification
 - System resolves "game_dev" from registry to configuration
 - Classification proceeds normally; custom taxonomy is applied
 - Enables domain-specific classification without modifying library code
+
+**File-Type Priority Scenario: High-Confidence Type Detection**
+- User calls `classify_repository_heuristic()` for a Laravel repository URL
+- System checks ground truth first; not found (avoids network request if it were cached)
+- Fetches README from GitHub; file type inference scans for file-name tokens
+- Finds multiple composer.json references, routes/web.php, bootstrap/ directory
+- File inference produces confidence 0.85 for "Framework" type
+- Since 0.85 >= threshold (0.7), returns immediately: {"Framework": 0.85}
+- Heuristic classification is never invoked (cascade short-circuits)
+
+**Heuristic Fallback Scenario: Ambiguous File Signals**
+- User calls `classify_repository_heuristic()` for a generic repository URL
+- Ground truth check fails (not in registry)
+- Fetches README; file type inference finds only vague patterns (few matches, confidence 0.45)
+- Since 0.45 < threshold (0.7), defers to heuristic method
+- Heuristic scans keywords and produces {"Library": 0.6, "Tool": 0.4}
+- Returns top-1: {"Library": 0.6}
 
 **Integration Scenario: AI Classification with Multiple Backends**
 - User switches between OpenAI and DeepSeek by changing `api_key` and `model_name`
