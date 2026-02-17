@@ -4,7 +4,7 @@ import json
 from typing import Dict, List, Union
 
 
-def _classify_description_ai(
+def _classify_description_aimodel(
     readme_text: str,
     classifier: Union[str, List[str]],
     model_name: str,

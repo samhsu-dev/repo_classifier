@@ -7,14 +7,14 @@ from typing import Dict, List, Optional, Union
 
 from .registry import get_classifier, get_available_classifiers
 from .utils import _get_top_n_scores, _get_repo_readme
-from .description import _classify_description_heuristic, _classify_description_ai
+from .description import _classify_description_heuristic, _classify_description_aimodel
 from .predefine import DFT_PROJECT_TYPE_NAMES
 from .evaluation import get_ground_truth_repos
-from .file_type_classifier import __classify_by_file_type
+from .file_type import __classify_by_file_type
 
 __all__ = [
     'classify_repository_heuristic',
-    'classify_repository_ai',
+    'classify_repository_aimodel',
 ]
 
 # File-type inference confidence threshold: if >= this value, return directly
@@ -84,7 +84,7 @@ def classify_repository_heuristic(
     all_scores = _classify_description_heuristic(readme_text, config)
     return _get_top_n_scores(all_scores, top_n)
 
-def classify_repository_ai(
+def classify_repository_aimodel(
     repo_url: str,
     classifier: Union[str, List[str]],
     api_url: str,
@@ -148,7 +148,7 @@ def classify_repository_ai(
             return {file_result[0]: file_result[1]}
 
     # Step 4: Fall back to LLM classification
-    scores = _classify_description_ai(
+    scores = _classify_description_aimodel(
         readme_text=readme_text,
         classifier=classifier,
         model_name=model_name,
