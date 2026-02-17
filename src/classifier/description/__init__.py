@@ -1,14 +1,9 @@
-"""
-README processing module.
+"""README processing module for low-level classification."""
 
-This module provides functionality for fetching and analyzing README files
-from GitHub repositories.
-"""
-
-from .heuristic import classify_description_heuristic
-from .ai_classifier import classify_description_ai
+from .heuristic import _classify_description_heuristic
+from .ai_classifier import _classify_description_ai
 
 __all__ = [
-    'classify_description_heuristic',
-    'classify_description_ai'
+    '_classify_description_heuristic',
+    '_classify_description_ai'
 ]
