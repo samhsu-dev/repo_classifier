@@ -5,13 +5,13 @@
 ### API Classification
 
 **Public API:**
-- Classification entry points: `classify_repository_heuristic()`, `classify_repository_ai()`
+- Classification entry points: `classify_repository_heuristic()`, `classify_repository_aimodel()`
 - Classifier management: `register_classifier()`, `get_classifier()`, `get_available_classifiers()`, `unregister_classifier()`, `load_classifier_from_module()`, `create_classifier_from_file()`
 - Ground truth management: `load_ground_truth()`, `save_ground_truth()`, `get_ground_truth_repos()`, `add_ground_truth_entry()`, `evaluate_classifier()`
 - Configuration constants: `CLASSIFIER_NAMES`, `ALL_PROJECT_TYPES`, `DFT_PROJECT_TYPE_NAMES`
 
 **Internal API (single underscore prefix):**
-- Low-level classifiers: `_classify_description_heuristic()`, `_classify_description_ai()`
+- Low-level classifiers: `_classify_description_heuristic()`, `_classify_description_aimodel()`
 - Utilities: `_get_repo_readme()`, `_normalize_scores()`, `_get_top_n_scores()`
 - File patterns data: `_FILE_TYPE_PATTERNS`
 
@@ -21,8 +21,8 @@
 
 ### Dependency Roles
 
-- **Orchestrators**: `classify_repository_heuristic`, `classify_repository_ai` (implement cascade pipeline)
-- **Helpers**: `_classify_description_heuristic()`, `_classify_description_ai()`, `_get_repo_readme()` (receive inputs by argument, stateless)
+- **Orchestrators**: `classify_repository_heuristic`, `classify_repository_aimodel` (implement cascade pipeline)
+- **Helpers**: `_classify_description_heuristic()`, `_classify_description_aimodel()`, `_get_repo_readme()` (receive inputs by argument, stateless)
 - **Data Holders**: Ground truth registry, classifier configs (keyword weights), file patterns
 - **Dependencies**: One-way only (Orchestrators → Helpers); no circular dependencies
 
@@ -67,7 +67,7 @@ results = classify_repository_heuristic(
 
 ---
 
-#### `classify_repository_ai(repo_url: str, classifier: Union[str, List[str]], api_url: str, model_name: str, api_key: str, top_n: int = 3, temperature: float = 0.1, max_in_tokens: Optional[int] = None, max_out_tokens: Optional[int] = None, timeout: int = 60) -> Dict[str, float]`
+#### `classify_repository_aimodel(repo_url: str, classifier: Union[str, List[str]], api_url: str, model_name: str, api_key: str, top_n: int = 3, temperature: float = 0.1, max_in_tokens: Optional[int] = None, max_out_tokens: Optional[int] = None, timeout: int = 60) -> Dict[str, float]`
 
 Responsibility: LLM-based classification path using cascade pipeline (Ground Truth → File Type → LLM).
 
@@ -97,8 +97,8 @@ Errors: Raises `ValueError` for invalid params, network failures, or JSON parse 
 
 Example:
 ```python
-from classifier import classify_repository_ai
-results = classify_repository_ai(
+from classifier import classify_repository_aimodel
+results = classify_repository_aimodel(
     "https://github.com/django/django",
     ["Web Framework", "Library", "Tool"],
     api_url="https://api.openai.com",
@@ -233,7 +233,7 @@ Errors: Raises `ValueError` if readme_text is empty
 
 ---
 
-#### `_classify_description_ai(readme_text: str, classifier: Union[str, List[str]], model_name: str, api_key: str, temperature: float = 0.1, timeout: int = 60) -> Dict[str, float]`
+#### `_classify_description_aimodel(readme_text: str, classifier: Union[str, List[str]], model_name: str, api_key: str, temperature: float = 0.1, timeout: int = 60) -> Dict[str, float]`
 
 Responsibility: Internal LLM-based classification step (uses litellm).
 
@@ -324,7 +324,7 @@ Note: NOT exposed in public API; uses `__` prefix for name mangling
 - `classifier` must be non-empty string (registry lookup) or non-empty dict (inline config)
 - `top_n` must be positive integer
 
-**classify_repository_ai:**
+**classify_repository_aimodel:**
 - `repo_url`, `classifier`, `api_url`, `model_name`, `api_key` must be non-empty
 - `top_n` must be positive integer
 - `temperature` must be in [0.0, 1.0]
@@ -350,7 +350,7 @@ Note: NOT exposed in public API; uses `__` prefix for name mangling
 1. **Ground Truth** — If repository URL in ground truth registry, return {type: 1.0} immediately (no README fetch)
 2. **File Type Inference** — If file patterns produce confidence >= 0.7, return that result (short-circuit to avoid fallback)
 3. **Heuristic Classification** — Keyword-based fallback when file inference uncertain
-4. **LLM Classification** — Used only via `classify_repository_ai()`; alternative path to heuristic (not sequential)
+4. **LLM Classification** — Used only via `classify_repository_aimodel()`; alternative path to heuristic (not sequential)
 
 **File Type Confidence Threshold:** 0.7
 

@@ -82,10 +82,10 @@ print(results)  # {"Frontend Framework": 0.88, "JavaScript Library": 0.40}
 ### Using AI Classification
 
 ```python
-from classifier import classify_repository_ai, CLASSIFIER_NAMES
+from classifier import classify_repository_aimodel, CLASSIFIER_NAMES
 
 # Use AI classification with built-in PHP project types
-results = classify_repository_ai(
+results = classify_repository_aimodel(
     "https://github.com/user/repo",
     api_key="your_api_key",
     classifier=CLASSIFIER_NAMES.PHP,
