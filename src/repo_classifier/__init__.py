@@ -5,6 +5,10 @@ Classifies GitHub repositories based on README content using a cascade
 pipeline: Ground Truth → File Type Inference → Heuristic/AI methods.
 """
 
+import warnings
+
+warnings.filterwarnings("ignore", module="urllib3")
+
 __version__ = "0.1.0"
 
 from .core import (
@@ -24,6 +28,7 @@ from .predefine import (
     CLASSIFIERS,
     DFT_PROJECT_TYPE_NAMES,
     JAVASCRIPT,
+    LangClassifier,
     PHP,
     PYTHON,
 )
@@ -58,6 +63,7 @@ __all__ = [
     # Predefined: singleton + property (prefer CLASSIFIERS.php, CLASSIFIERS.names())
     "CLASSIFIERS",
     "CLASSIFIER_NAMES",
+    "LangClassifier",
     "ALL_PROJECT_TYPES",
     "DFT_PROJECT_TYPE_NAMES",
     "PHP",

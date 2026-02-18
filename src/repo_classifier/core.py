@@ -12,8 +12,7 @@ from .description import (
 )
 from .evaluation import get_ground_truth_repos
 from .file_type import __classify_by_file_type
-from .predefine import DFT_PROJECT_TYPE_NAMES
-from .predefine.base import LanguageClassifier
+from .predefine import DFT_PROJECT_TYPE_NAMES, LangClassifier
 from .registry import get_available_classifiers, get_classifier
 from .utils import _get_repo_readme, _get_top_n_scores
 
@@ -28,7 +27,7 @@ FILE_TYPE_CONFIDENCE_THRESHOLD = 0.7
 
 def classify_repository_heuristic(
     repo_url: str,
-    classifier: Union[str, Dict[str, Dict[str, int]], LanguageClassifier],
+    classifier: Union[str, Dict[str, Dict[str, int]], LangClassifier],
     top_n: int = 3,
 ) -> Dict[str, float]:
     """Classify a GitHub repository using cascade pipeline.
@@ -40,7 +39,7 @@ def classify_repository_heuristic(
 
     Args:
         repo_url: GitHub repository URL.
-        classifier: Classifier name, config dict, or LanguageClassifier (e.g. CLASSIFIERS.php).
+        classifier: Classifier name, config dict, or LangClassifier (e.g. CLASSIFIERS.php).
         top_n: Number of top types to return. Must be positive.
 
     Returns:
@@ -56,10 +55,10 @@ def classify_repository_heuristic(
     if top_n <= 0:
         raise ValueError("top_n must be a positive integer")
 
-    # Normalize: LanguageClassifier -> name + config
-    if isinstance(classifier, LanguageClassifier):
+    # Normalize: LangClassifier -> name + config
+    if isinstance(classifier, LangClassifier):
         classifier_name = classifier.name
-        config = classifier.project_types
+        config = classifier.type_keywords
     elif isinstance(classifier, str):
         classifier_name = classifier
         _config = get_classifier(classifier)
@@ -97,7 +96,7 @@ def classify_repository_heuristic(
 
 def classify_repository_aimodel(
     repo_url: str,
-    classifier: Union[str, List[str], LanguageClassifier],
+    classifier: Union[str, List[str], LangClassifier],
     model_name: str,
     api_key: str,
     top_n: int = 3,
@@ -108,7 +107,7 @@ def classify_repository_aimodel(
 
     Args:
         repo_url: GitHub repository URL.
-        classifier: Classifier name (str), list of project types, or LanguageClassifier.
+        classifier: Classifier name (str), list of project types, or LangClassifier.
         model_name: LLM model identifier (e.g., "gpt-4o", "claude-3-opus-20240229").
         api_key: API credentials.
         top_n: Number of top results (default: 3).
@@ -136,12 +135,12 @@ def classify_repository_aimodel(
     if not model_name:
         raise ValueError("Model name cannot be empty")
 
-    # Normalize: LanguageClassifier -> name + project_type_names list
+    # Normalize: LangClassifier -> name + type_names list
     _name: Optional[str]
     _project_types: Union[str, List[str]]
-    if isinstance(classifier, LanguageClassifier):
+    if isinstance(classifier, LangClassifier):
         _name = classifier.name
-        _project_types = classifier.project_type_names
+        _project_types = classifier.type_names
     else:
         _name = classifier if isinstance(classifier, str) else None
         _project_types = classifier
@@ -169,9 +168,15 @@ def classify_repository_aimodel(
         temperature=temperature,
         timeout=timeout,
     )
+    type_descriptions: Optional[Dict[str, str]] = (
+        getattr(classifier, "type_descriptions", None)
+        if isinstance(classifier, LangClassifier)
+        else None
+    )
     scores = _classify_description_aimodel(
         readme_text=readme_text,
         classifier=_project_types,
         options=options,
+        type_descriptions=type_descriptions,
     )
     return _get_top_n_scores(scores, top_n)

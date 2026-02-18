@@ -64,13 +64,20 @@ def _get_repo_readme(repo_url: str) -> str:
 
     owner, repo = parts[0], parts[1]
 
+    # GitHub raw URLs are case-sensitive; repos use README.md, Readme.md, readme.md, etc.
+    readme_filenames = [
+        "README.md",
+        "Readme.md",
+        "readme.md",
+        "README.rst",
+        "Readme.rst",
+        "README",
+    ]
+    branches = ["main", "master"]
     readme_variants = [
-        f"https://raw.githubusercontent.com/{owner}/{repo}/master/README.md",
-        f"https://raw.githubusercontent.com/{owner}/{repo}/master/README.rst",
-        f"https://raw.githubusercontent.com/{owner}/{repo}/master/README",
-        f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md",
-        f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.rst",
-        f"https://raw.githubusercontent.com/{owner}/{repo}/main/README",
+        f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}"
+        for branch in branches
+        for filename in readme_filenames
     ]
 
     for url in readme_variants:

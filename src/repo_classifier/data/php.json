@@ -1,0 +1,90 @@
+{
+  "Web App": {
+    "description": "Full web application: CMS, e-commerce, blog, or similar deployable site.",
+    "keywords": {
+      "web application": 10,
+      "web app": 10,
+      "webapp": 8,
+      "cms": 8,
+      "content management": 8,
+      "ecommerce": 8,
+      "e-commerce": 8,
+      "online store": 8,
+      "blog": 5,
+      "website": 5
+    },
+    "file_patterns": ["wp-config.php"]
+  },
+  "Framework": {
+    "description": "Application or web framework (e.g. Laravel, Symfony) for building apps.",
+    "keywords": {
+      "framework": 10,
+      "mvc": 8,
+      "model-view-controller": 8,
+      "application framework": 10,
+      "web framework": 10
+    },
+    "file_patterns": ["symfony.lock", "config/app.php", "bootstrap/app.php"]
+  },
+  "Framework Plugin": {
+    "description": "Plugin or extension for a framework (e.g. WordPress/Drupal plugin).",
+    "keywords": {
+      "plugin": 10,
+      "extension": 8,
+      "addon": 8,
+      "add-on": 8,
+      "module": 5,
+      "wordpress plugin": 10,
+      "drupal module": 10,
+      "joomla extension": 10
+    },
+    "file_patterns": ["plugin.php", "drupal.info", "wp-content/plugins"]
+  },
+  "Framework Theme": {
+    "description": "Theme or template pack for a framework (e.g. WordPress theme).",
+    "keywords": {
+      "theme": 10,
+      "template": 8,
+      "skin": 5,
+      "wordpress theme": 10,
+      "drupal theme": 10,
+      "joomla template": 10
+    },
+    "file_patterns": ["theme.json", "style.css", "wp-content/themes"]
+  },
+  "Library": {
+    "description": "Reusable package or component consumed by other code.",
+    "keywords": {
+      "library": 10,
+      "package": 8,
+      "component": 5,
+      "helper": 5,
+      "utility": 5,
+      "composer": 8
+    },
+    "file_patterns": []
+  },
+  "CLI App": {
+    "description": "Command-line tool or script.",
+    "keywords": {
+      "cli": 10,
+      "command line": 10,
+      "console": 8,
+      "terminal": 8,
+      "shell": 5
+    },
+    "file_patterns": []
+  },
+  "PHP-SRC": {
+    "description": "PHP language interpreter or core source.",
+    "keywords": {
+      "php-src": 15,
+      "php source": 15,
+      "php interpreter": 15,
+      "php language": 15,
+      "php core": 15,
+      "zend engine": 15
+    },
+    "file_patterns": ["main/php.h"]
+  }
+}

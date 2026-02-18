@@ -68,7 +68,7 @@ The Repository Classifier is a library that serves as the central classification
 
 - **Project Type** - A category label representing a repository's primary function (e.g., "Web Framework", "CLI Tool", "Library"). Project types are organized within language-specific taxonomies (PHP, Python, JavaScript).
 
-- **Classifier** - A configuration mapping project types to keyword sets with associated weights. Built-in classifiers are implemented as LanguageClassifier subclasses (one instance per language: `PHP`, `PYTHON`, `JAVASCRIPT`), exposed via the `CLASSIFIERS` singleton (e.g. `CLASSIFIERS.php`). The registry also stores name → project_types dict for lookup by string (e.g. `"php"`). Custom classifiers can be registered by name with `register_classifier()`.
+- **Classifier** - A configuration mapping project types to keyword sets with associated weights. Built-in classifiers are LangClassifier instances (PHP, PYTHON, JAVASCRIPT), exposed via the `CLASSIFIERS` singleton (e.g. `CLASSIFIERS.php`). The registry stores name → type_keywords dict for lookup by string (e.g. `"php"`). Custom classifiers can be registered by name with `register_classifier()`.
 
 - **Keyword Weight** - An integer value (typically 1–10) assigned to a keyword within a project type. Higher weights indicate stronger signals for that project type. Weights are used in heuristic scoring.
 
@@ -80,19 +80,19 @@ The Repository Classifier is a library that serves as the central classification
 
 - **Ground Truth** - Known correct project type for a repository, stored in a registry for evaluation and validation. If a repository exists in ground truth, its classification returns the known type with confidence 1.0.
 
-- **Classifier Registry** - Central in-memory registry maintaining name → project_types dict for all classifiers. Built-in entries are populated from CLASSIFIERS (php, python, javascript). Supports registration, lookup, and unregistration of custom classifier configurations.
+- **Classifier Registry** - Central in-memory registry maintaining name → type_keywords dict for all classifiers. Built-in entries are populated from CLASSIFIERS (php, python, javascript). Supports registration, lookup, and unregistration of custom classifier configurations.
 
 - **Score Normalization** - Process of converting raw keyword-matching scores (unbounded integers) into confidence scores (0.0–1.0). Enables fair comparison across different project types and classifiers.
 
 - **Top-N Selection** - Filtering mechanism that returns only the N highest-confidence project types, reducing noise and focusing results on the most likely classifications.
 
-- **File-Type Pattern** - A mapping from project types to lists of characteristic file names and path fragments (e.g., `composer.json`, `manage.py`, `package.json`). When these tokens appear in README text, they strongly suggest the corresponding project type. Patterns are defined as the `file_patterns` class attribute on each LanguageClassifier subclass in `predefine/php.py`, `predefine/python.py`, and `predefine/javascript.py`.
+- **File-Type Pattern** - A mapping from project types to lists of characteristic file names and path fragments (e.g., `composer.json`, `manage.py`, `package.json`). When these tokens appear in README text, they strongly suggest the corresponding project type. Patterns are in `LangClassifier.type_files`, loaded from JSON files in package `data/` (e.g. `data/php.json`).
 
 - **Cascade Pipeline** - A priority-based classification strategy where methods are tried in order: Ground Truth (highest priority) → File Type Inference → Heuristic (fallback). Each stage either succeeds and returns a result, or defers to the next stage.
 
 - **Confidence Threshold** - A minimum confidence score (0.7) below which file-type inference defers to heuristic classification. If file inference produces a score >= threshold, that result is returned immediately without trying other methods.
 
-- **LanguageClassifier** - Abstract base class (predefine/base.py) defining the interface for one language: `name`, `project_types`, `file_patterns`. Concrete subclasses (e.g. PHPClassifier, PythonClassifier) hold data as class attributes; one singleton instance per language (PHP, PYTHON, JAVASCRIPT). The CLASSIFIERS singleton exposes built-ins and drives ALL_PROJECT_TYPES, DFT_PROJECT_TYPE_NAMES, and file-type patterns for the registry and cascade.
+- **LangClassifier** - Class in `predefine.py`: constructor takes a JSON file path only (no dict); loads type definitions from that file. Exposes `name`, `type_keywords`, `type_files`, `type_descriptions`, `type_names`. Built-ins (PHP, PYTHON, JAVASCRIPT) are instances loading from `data/php.json`, `data/python.json`, `data/javascript.json`; CLASSIFIERS exposes them and drives ALL_PROJECT_TYPES, DFT_PROJECT_TYPE_NAMES, and file-type patterns for the registry and cascade.
 
 
 ## 3. Contracts & Flow
@@ -121,7 +121,7 @@ The Repository Classifier is a library that serves as the central classification
 1. **Input Validation** - Verify all parameters (URL, API key, model, classifier)
 2. **Ground Truth Check** - If repository in ground truth, return known type with confidence 1.0
 3. **README Retrieval** - Fetch README content
-4. **Project Type Resolution** - Resolve classifier (LanguageClassifier, name, or list) to list of project types
+4. **Project Type Resolution** - Resolve classifier (LangClassifier, name, or list) to list of project types
 5. **File Type Inference** - If confident (>= 0.7), return; otherwise continue
 6. **LLM Prompt Construction** - Build prompt with README, project types, and instructions for the AI
 7. **API Call** - Send request via litellm with model_name, api_key, temperature, timeout

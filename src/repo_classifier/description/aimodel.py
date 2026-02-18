@@ -39,6 +39,7 @@ def _classify_description_aimodel(
     readme_text: str,
     classifier: Union[str, List[str]],
     options: _LLMOptions,
+    type_descriptions: Optional[Dict[str, str]] = None,
 ) -> Dict[str, float]:
     """Classify repository using LLM (internal cascade step).
 
@@ -48,6 +49,7 @@ def _classify_description_aimodel(
         readme_text: Raw README text.
         classifier: Classifier name or list of project types.
         options: LLM options (model_name, api_key, temperature, timeout).
+        type_descriptions: Optional map of type name -> short description for the prompt.
 
     Returns:
         Project types to confidence scores (0.0–1.0).
@@ -68,12 +70,15 @@ def _classify_description_aimodel(
     types_list: List[str] = (
         list(classifier) if isinstance(classifier, list) else [classifier]
     )
-    types_line = "\n".join(f"- {t}" for t in types_list)
+    descs = type_descriptions or {}
+    types_line = "\n".join(
+        f"- {t}: {descs[t]}" if t in descs else f"- {t}" for t in types_list
+    )
     readme_excerpt = readme_text[:2000].strip()
 
     system_content = (
-        "Classify repo description into the given types. "
-        "Reply with a single JSON object: keys = type names, values = confidence 0.0–1.0 (sum optional). No other text."
+        "Classify the repo description into the given types (use type descriptions when provided). "
+        "Reply with a single JSON object: keys = type names, values = confidence 0.0–1.0. No other text."
     )
     user_content = f"TYPES:\n{types_line}\n\nDESCRIPTION:\n{readme_excerpt}"
 

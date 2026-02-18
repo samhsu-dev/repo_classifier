@@ -1,6 +1,6 @@
 # Repository Classifier
 
-Python library that classifies GitHub repositories by project type using a cascade: Ground Truth → File-type inference → Heuristic or LLM. Built-in classifiers: PHP, Python, JavaScript.
+Classifies GitHub repositories by project type using a cascade: **Ground Truth → File-type inference → Heuristic or LLM**. Built-in classifiers: PHP, Python, JavaScript.
 
 ## Installation
 
@@ -21,17 +21,15 @@ uv sync
 ```python
 from repo_classifier import classify_repository_heuristic, classify_repository_aimodel, CLASSIFIERS
 
-# Heuristic (keyword + file-type cascade)
+# Heuristic (no API key)
 results = classify_repository_heuristic(
     "https://github.com/laravel/laravel",
-    classifier=CLASSIFIERS.php,  # or "php" or CLASSIFIER_NAMES.PHP
+    classifier=CLASSIFIERS.php,  # or "php"
     top_n=3,
 )
 # {"Framework": 0.95, ...}
 
-# LLM (same cascade, LLM fallback; requires api_key and model_name)
-# model_name must be the full identifier: provider/model (e.g., openai/gpt-4o, deepseek/deepseek-chat). 
-# Please also ensure the model parameters are configured correctly. For example, GPT-5.0+ requires temperature = 1, as specified by LiteLLM. 
+# LLM: set api_key and model_name (provider/model, e.g. openai/gpt-4o); optional: docs/.env (see docs/.env.example)
 results = classify_repository_aimodel(
     "https://github.com/django/django",
     classifier=CLASSIFIERS.python,
@@ -42,7 +40,7 @@ results = classify_repository_aimodel(
 
 ## Advanced usage
 
-**Custom classifier (inline config)** — register a name → type/weight map, then pass the name to `classify_repository_heuristic` or `classify_repository_aimodel`.
+**Custom classifier** — register a name → type/weight map; then pass the name to `classify_repository_heuristic` or `classify_repository_aimodel`.
 
 ```python
 from repo_classifier import register_classifier, classify_repository_heuristic
@@ -51,17 +49,17 @@ register_classifier("game", {"Game Engine": {"engine": 10, "game": 8}, "Tool": {
 classify_repository_heuristic("https://github.com/...", classifier="game", top_n=2)
 ```
 
-**Classifier from file or module** — load from a text file or Python module and use by name.
+**Classifier from file or module** — File format: `TYPE: TypeName` then `keyword: weight` per line. `create_classifier_from_file(path)` returns a config dict; pass to classification or `register_classifier`. `load_classifier_from_module(module_path, attribute_name=None)` registers config(s) from a module.
 
 ```python
 from repo_classifier import create_classifier_from_file, register_classifier, load_classifier_from_module
 
 config = create_classifier_from_file("path/to/types.txt")
 register_classifier("my_domain", config)
-# or: load_classifier_from_module("path/to/classifiers.py")  # registers all exports
+# or: load_classifier_from_module("path/to/classifiers.py")
 ```
 
-**LLM with custom type list** — pass a list of project types instead of a built-in classifier; no registration.
+**LLM with custom type list** — pass a list of type names; no registration.
 
 ```python
 classify_repository_aimodel(
@@ -72,13 +70,13 @@ classify_repository_aimodel(
 )
 ```
 
-**Ground truth and evaluation** — load repo→type mapping from JSON, evaluate a classifier and get accuracy/F1.
+**Ground truth and evaluation** — `load_ground_truth(path)` / `save_ground_truth(path, dict)`; `add_ground_truth_entry(url, type)`; `evaluate_classifier(name, truth_dict)` returns metrics (accuracy, precision, recall, f1).
 
 ```python
 from repo_classifier import load_ground_truth, evaluate_classifier
 
-truth = load_ground_truth("path/to/ground_truth.json")  # {"https://github.com/...": "Framework", ...}
-metrics = evaluate_classifier("php", truth)  # {"accuracy": 0.92, "f1": 0.88, ...}
+truth = load_ground_truth("path/to/ground_truth.json")
+metrics = evaluate_classifier("php", truth)
 ```
 
 ## Documentation
