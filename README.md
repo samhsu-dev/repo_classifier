@@ -30,10 +30,12 @@ results = classify_repository_heuristic(
 # {"Framework": 0.95, ...}
 
 # LLM (same cascade, LLM fallback; requires api_key and model_name)
+# model_name must be the full identifier: provider/model (e.g., openai/gpt-4o, deepseek/deepseek-chat). 
+# Please also ensure the model parameters are configured correctly. For example, GPT-5.0+ requires temperature = 1, as specified by LiteLLM. 
 results = classify_repository_aimodel(
     "https://github.com/django/django",
     classifier=CLASSIFIERS.python,
-    model_name="gpt-4o",
+    model_name="openai/gpt-4o",
     api_key="sk-...",
 )
 ```
@@ -65,7 +67,7 @@ register_classifier("my_domain", config)
 classify_repository_aimodel(
     "https://github.com/...",
     classifier=["Web App", "API", "Library", "CLI"],
-    model_name="gpt-4o",
+    model_name="openai/gpt-4o-mini",
     api_key="sk-...",
 )
 ```

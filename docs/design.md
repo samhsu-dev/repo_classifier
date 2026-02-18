@@ -82,7 +82,7 @@ Behavior:
 Input:
 - `repo_url`: GitHub repository URL
 - `classifier`: LanguageClassifier (e.g. `CLASSIFIERS.python`), classifier name (str), or list of project type names
-- `model_name`: LLM model identifier (e.g., "gpt-4o", "claude-3-opus-20240229")
+- `model_name`: Full model id in form `provider/model` (e.g. "openai/gpt-4o", "deepseek/deepseek-chat", "anthropic/claude-3-opus-20240229")
 - `api_key`: API credentials
 - `top_n`: Number of top results (default: 3)
 - `temperature`: LLM randomness 0.0–1.0 (default: 0.1)
@@ -98,7 +98,7 @@ from repo_classifier import classify_repository_aimodel, CLASSIFIERS
 results = classify_repository_aimodel(
     "https://github.com/django/django",
     CLASSIFIERS.python,  # or ["Web Framework", "Library", "Tool"] or "python"
-    model_name="gpt-4o",
+    model_name="openai/gpt-4o",
     api_key="sk-...",
 )
 ```

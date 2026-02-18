@@ -6,7 +6,7 @@
 
 ## APIs
 
-- **`litellm.completion(model, messages, response_format, temperature, timeout, api_key)`** — Call LLM with JSON output. Returns `ModelResponse` with content at `['choices'][0]['message']['content']`. Provider auto-detected from model string (e.g., `"gpt-4o"` → OpenAI, `"claude-3-opus-20240229"` → Anthropic).
+- **`litellm.completion(model, messages, response_format, temperature, timeout, api_key)`** — Call LLM with JSON output. Returns `ModelResponse` with content at `['choices'][0]['message']['content']`. Provider auto-detected from model string (e.g. `"openai/gpt-4o"`, `"anthropic/claude-3-opus-20240229"`).
 - **`json.loads(json_str)`** — Parse LLM's JSON response. Raises `json.JSONDecodeError` if malformed.
 
 ## Developer Instructions
@@ -26,5 +26,5 @@
 - Cascade order critical: check ground truth *before* README fetch (avoid network request if known).
 - File-type inference confidence threshold = 0.7 (short-circuits LLM step if met).
 - LLM is final fallback only; heuristic should be attempted first via `classify_repository_heuristic()` if needed.
-- Provider auto-detected from `model_name` (e.g., "gpt-4o" → OpenAI, "claude-3-opus-20240229" → Anthropic).
+- Provider and model from `model_name` in form `provider/model` (e.g. "openai/gpt-4o", "anthropic/claude-3-opus-20240229", "deepseek/deepseek-chat").
 - `_classify_description_aimodel()` minimal interface: only parameters actually used (no unused api_url/max_tokens).
