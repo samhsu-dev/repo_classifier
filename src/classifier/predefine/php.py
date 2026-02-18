@@ -14,30 +14,49 @@ class PHPClassifier(LanguageClassifier):
 
     file_patterns = {
         "Web App": [
-            "index.php", "public/index.php", ".htaccess",
-            "wp-config.php", "config.php", "routes/web.php",
+            "index.php",
+            "public/index.php",
+            ".htaccess",
+            "wp-config.php",
+            "config.php",
+            "routes/web.php",
         ],
         "Framework": [
-            "artisan", "composer.json", "symfony.lock",
-            "config/app.php", "bootstrap/app.php",
+            "artisan",
+            "composer.json",
+            "symfony.lock",
+            "config/app.php",
+            "bootstrap/app.php",
         ],
         "Framework Plugin": [
-            "plugin.php", "wp-content/plugins",
-            "modules/", "drupal.info",
+            "plugin.php",
+            "wp-content/plugins",
+            "modules/",
+            "drupal.info",
         ],
         "Framework Theme": [
-            "style.css", "functions.php", "theme.json",
-            "templates/", "wp-content/themes",
+            "style.css",
+            "functions.php",
+            "theme.json",
+            "templates/",
+            "wp-content/themes",
         ],
         "Library": [
-            "composer.json", "src/", "vendor/",
-            "phpunit.xml", "phpstan.neon",
+            "composer.json",
+            "src/",
+            "vendor/",
+            "phpunit.xml",
+            "phpstan.neon",
         ],
         "CLI App": [
-            "bin/", "console", "artisan",
+            "bin/",
+            "console",
+            "artisan",
         ],
         "PHP-SRC": [
-            "Zend/", "php-src", "main/php.h",
+            "Zend/",
+            "php-src",
+            "main/php.h",
         ],
     }
 

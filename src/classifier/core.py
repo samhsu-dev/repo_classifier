@@ -5,21 +5,26 @@ Implements cascade pipeline: Ground Truth → File Type → Heuristic/LLM.
 
 from typing import Dict, List, Optional, Union
 
-from .registry import get_classifier, get_available_classifiers
-from .utils import _get_top_n_scores, _get_repo_readme
-from .description import _classify_description_heuristic, _classify_description_aimodel
-from .predefine import DFT_PROJECT_TYPE_NAMES
-from .predefine.base import LanguageClassifier
+from .description import (
+    _classify_description_aimodel,
+    _classify_description_heuristic,
+    _LLMOptions,
+)
 from .evaluation import get_ground_truth_repos
 from .file_type import __classify_by_file_type
+from .predefine import DFT_PROJECT_TYPE_NAMES
+from .predefine.base import LanguageClassifier
+from .registry import get_available_classifiers, get_classifier
+from .utils import _get_repo_readme, _get_top_n_scores
 
 __all__ = [
-    'classify_repository_heuristic',
-    'classify_repository_aimodel',
+    "classify_repository_heuristic",
+    "classify_repository_aimodel",
 ]
 
 # File-type inference confidence threshold: if >= this value, return directly
 FILE_TYPE_CONFIDENCE_THRESHOLD = 0.7
+
 
 def classify_repository_heuristic(
     repo_url: str,
@@ -35,7 +40,7 @@ def classify_repository_heuristic(
 
     Args:
         repo_url: GitHub repository URL.
-        classifier: Classifier name, configuration dict, or LanguageClassifier (e.g. CLASSIFIERS.php).
+        classifier: Classifier name, config dict, or LanguageClassifier (e.g. CLASSIFIERS.php).
         top_n: Number of top types to return. Must be positive.
 
     Returns:
@@ -57,13 +62,14 @@ def classify_repository_heuristic(
         config = classifier.project_types
     elif isinstance(classifier, str):
         classifier_name = classifier
-        config = get_classifier(classifier)
-        if not config:
+        _config = get_classifier(classifier)
+        if _config is None:
             available = get_available_classifiers()
             raise ValueError(
                 f"Classifier not found: {classifier}. "
                 f"Available classifiers: {', '.join(available)}"
             )
+        config = _config
     else:
         classifier_name = None
         config = classifier
@@ -88,30 +94,25 @@ def classify_repository_heuristic(
     all_scores = _classify_description_heuristic(readme_text, config)
     return _get_top_n_scores(all_scores, top_n)
 
+
 def classify_repository_aimodel(
     repo_url: str,
     classifier: Union[str, List[str], LanguageClassifier],
-    api_url: str,
     model_name: str,
     api_key: str,
     top_n: int = 3,
     temperature: float = 0.1,
-    max_in_tokens: Optional[int] = None,
-    max_out_tokens: Optional[int] = None,
     timeout: int = 60,
 ) -> Dict[str, float]:
     """Classify repository using LLM (cascade pipeline: Ground Truth → File Type → LLM).
 
     Args:
         repo_url: GitHub repository URL.
-        classifier: Classifier name (str) or list of project types.
-        api_url: LLM service endpoint.
+        classifier: Classifier name (str), list of project types, or LanguageClassifier.
         model_name: LLM model identifier (e.g., "gpt-4o", "claude-3-opus-20240229").
         api_key: API credentials.
         top_n: Number of top results (default: 3).
         temperature: LLM randomness 0.0–1.0 (default: 0.1).
-        max_in_tokens: Input token limit (optional).
-        max_out_tokens: Output token limit (optional).
         timeout: Request timeout in seconds (default: 60).
 
     Returns:
@@ -136,6 +137,8 @@ def classify_repository_aimodel(
         raise ValueError("Model name cannot be empty")
 
     # Normalize: LanguageClassifier -> name + project_type_names list
+    _name: Optional[str]
+    _project_types: Union[str, List[str]]
     if isinstance(classifier, LanguageClassifier):
         _name = classifier.name
         _project_types = classifier.project_type_names
@@ -160,12 +163,15 @@ def classify_repository_aimodel(
             return {file_result[0]: file_result[1]}
 
     # Step 4: Fall back to LLM classification
-    scores = _classify_description_aimodel(
-        readme_text=readme_text,
-        classifier=_project_types,
+    options = _LLMOptions(
         model_name=model_name,
         api_key=api_key,
         temperature=temperature,
         timeout=timeout,
+    )
+    scores = _classify_description_aimodel(
+        readme_text=readme_text,
+        classifier=_project_types,
+        options=options,
     )
     return _get_top_n_scores(scores, top_n)

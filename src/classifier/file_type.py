@@ -9,8 +9,8 @@ method before falling back to heuristic or LLM approaches.
 import re
 from typing import Dict, List, Optional, Tuple
 
-from .utils import _normalize_scores
 from .predefine import _FILE_TYPE_PATTERNS
+from .utils import _normalize_scores
 
 _TOKEN_RE = re.compile(
     r"""

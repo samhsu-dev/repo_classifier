@@ -1,16 +1,44 @@
 """Internal LLM-based classification step."""
 
 import json
-from typing import Dict, List, Union
+from typing import Callable, Dict, List, NamedTuple, Optional, Protocol, Union, cast
+
+
+class _LitellmMessage(Protocol):
+    content: str
+
+
+class _LitellmChoice(Protocol):
+    message: _LitellmMessage
+
+
+class _LitellmResponse(Protocol):
+    choices: List[_LitellmChoice]
+
+
+_litellm_completion_fn: Optional[Callable[..., object]] = None
+_litellm_import_error: Optional[ImportError] = None
+try:
+    from litellm import completion
+
+    _litellm_completion_fn = completion
+except ImportError as _exc:
+    _litellm_import_error = _exc
+
+
+class _LLMOptions(NamedTuple):
+    """Options for LLM call (model_name, api_key, temperature, timeout)."""
+
+    model_name: str
+    api_key: str
+    temperature: float = 0.1
+    timeout: int = 60
 
 
 def _classify_description_aimodel(
     readme_text: str,
     classifier: Union[str, List[str]],
-    model_name: str,
-    api_key: str,
-    temperature: float = 0.1,
-    timeout: int = 60,
+    options: _LLMOptions,
 ) -> Dict[str, float]:
     """Classify repository using LLM (internal cascade step).
 
@@ -19,10 +47,7 @@ def _classify_description_aimodel(
     Args:
         readme_text: Raw README text.
         classifier: Classifier name or list of project types.
-        model_name: LLM model identifier.
-        api_key: API credentials.
-        temperature: LLM randomness 0.0–1.0.
-        timeout: Request timeout in seconds.
+        options: LLM options (model_name, api_key, temperature, timeout).
 
     Returns:
         Project types to confidence scores (0.0–1.0).
@@ -34,33 +59,36 @@ def _classify_description_aimodel(
         raise ValueError("readme_text cannot be empty")
     if not classifier:
         raise ValueError("classifier cannot be empty")
+    if _litellm_completion_fn is None:
+        assert _litellm_import_error is not None
+        raise ValueError(
+            "litellm required; install with: pip install litellm"
+        ) from _litellm_import_error
 
-    try:
-        from litellm import completion
-    except ImportError:
-        raise ValueError("litellm required; install with: pip install litellm")
-
-    project_types_str = ", ".join(classifier) if isinstance(classifier, list) else classifier
-
-    prompt = (
-        f"Classify this GitHub README into one of these project types: {project_types_str}\n\n"
-        f"README:\n{readme_text[:2000]}"
+    types_list: List[str] = (
+        list(classifier) if isinstance(classifier, list) else [classifier]
     )
+    types_line = "\n".join(f"- {t}" for t in types_list)
+    readme_excerpt = readme_text[:2000].strip()
 
-    response = completion(
-        model=model_name,
+    system_content = (
+        "Classify repo description into the given types. "
+        "Reply with a single JSON object: keys = type names, values = confidence 0.0–1.0 (sum optional). No other text."
+    )
+    user_content = f"TYPES:\n{types_line}\n\nDESCRIPTION:\n{readme_excerpt}"
+
+    raw_response = _litellm_completion_fn(
+        model=options.model_name,
         messages=[
-            {
-                "role": "system",
-                "content": "You are a repository classifier. Respond with valid JSON only.",
-            },
-            {"role": "user", "content": prompt},
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content},
         ],
         response_format={"type": "json_object"},
-        temperature=temperature,
-        timeout=timeout,
-        api_key=api_key,
+        temperature=options.temperature,
+        timeout=options.timeout,
+        api_key=options.api_key,
     )
+    response = cast(_LitellmResponse, raw_response)
 
     try:
         json_str = response.choices[0].message.content

@@ -20,8 +20,8 @@ def load_ground_truth(filepath: str) -> Dict[str, str]:
     """
     global _GROUND_TRUTH
     try:
-        with open(filepath, 'r') as f:
-            if filepath.endswith('.json'):
+        with open(filepath, "r") as f:
+            if filepath.endswith(".json"):
                 _GROUND_TRUTH = json.load(f)
             else:
                 raise ValueError(f"Unsupported file format: {filepath}")
@@ -39,7 +39,7 @@ def save_ground_truth(filepath: str, truth_dict: Dict[str, str]) -> None:
         filepath: Path to JSON file.
         truth_dict: Repository URLs to known types.
     """
-    with open(filepath, 'w') as f:
+    with open(filepath, "w") as f:
         json.dump(truth_dict, f, indent=2)
 
 
@@ -63,7 +63,9 @@ def get_ground_truth_repos() -> Dict[str, str]:
     return _GROUND_TRUTH.copy()
 
 
-def evaluate_classifier(classifier_name: str, truth_dict: Dict[str, str]) -> Dict[str, float]:
+def evaluate_classifier(
+    classifier_name: str, truth_dict: Dict[str, str]
+) -> Dict[str, float]:
     """Evaluate classifier accuracy against ground truth.
 
     Args:

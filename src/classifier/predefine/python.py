@@ -14,33 +14,55 @@ class PythonClassifier(LanguageClassifier):
 
     file_patterns = {
         "Web Framework": [
-            "manage.py", "wsgi.py", "asgi.py",
-            "django/", "flask", "fastapi",
+            "manage.py",
+            "wsgi.py",
+            "asgi.py",
+            "django/",
+            "flask",
+            "fastapi",
         ],
         "Data Science": [
-            "requirements.txt", "environment.yml",
-            "notebooks/", "jupyter", "setup.py",
+            "requirements.txt",
+            "environment.yml",
+            "notebooks/",
+            "jupyter",
+            "setup.py",
         ],
         "CLI Tool": [
-            "setup.py", "pyproject.toml", "main.py",
-            "cli.py", "__main__.py",
+            "setup.py",
+            "pyproject.toml",
+            "main.py",
+            "cli.py",
+            "__main__.py",
         ],
         "Library/Package": [
-            "setup.py", "pyproject.toml", "src/",
-            "setup.cfg", "MANIFEST.in",
+            "setup.py",
+            "pyproject.toml",
+            "src/",
+            "setup.cfg",
+            "MANIFEST.in",
         ],
         "Web Scraping": [
-            "scrapy.cfg", "scrapy", "spiders/",
+            "scrapy.cfg",
+            "scrapy",
+            "spiders/",
         ],
         "API/Backend": [
-            "main.py", "app.py", "api/",
+            "main.py",
+            "app.py",
+            "api/",
         ],
         "Desktop Application": [
-            "main.py", "ui/", "gui/",
+            "main.py",
+            "ui/",
+            "gui/",
         ],
         "Testing Tool": [
-            "pytest.ini", "conftest.py", "tests/",
-            "tox.ini", ".coveragerc",
+            "pytest.ini",
+            "conftest.py",
+            "tests/",
+            "tox.ini",
+            ".coveragerc",
         ],
     }
 

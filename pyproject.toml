@@ -23,6 +23,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "litellm>=1.0.0",
+    "python-dotenv>=1.0.0",
     "pytest>=6.0.0",
     "pytest-cov>=2.10.0",
     "black>=24.0.0",

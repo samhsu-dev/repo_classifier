@@ -9,9 +9,9 @@ append it to the list in _BuiltinClassifiers._classifiers.
 from typing import Dict, List
 
 from .base import LanguageClassifier
+from .javascript import JAVASCRIPT
 from .php import PHP
 from .python import PYTHON
-from .javascript import JAVASCRIPT
 
 
 class _BuiltinClassifiers:

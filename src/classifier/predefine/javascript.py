@@ -14,36 +14,66 @@ class JavaScriptClassifier(LanguageClassifier):
 
     file_patterns = {
         "Frontend Framework": [
-            "package.json", "src/App.js", "src/App.jsx", "src/App.tsx",
-            "vite.config", "next.config", "nuxt.config",
+            "package.json",
+            "src/App.js",
+            "src/App.jsx",
+            "src/App.tsx",
+            "vite.config",
+            "next.config",
+            "nuxt.config",
         ],
         "Node.js Backend": [
-            "package.json", "index.js", "server.js",
-            "app.js", "express", "koa",
+            "package.json",
+            "index.js",
+            "server.js",
+            "app.js",
+            "express",
+            "koa",
         ],
         "Static Site Generator": [
-            "package.json", "gatsby-config", "next.config",
-            "nuxt.config", "config.toml",
+            "package.json",
+            "gatsby-config",
+            "next.config",
+            "nuxt.config",
+            "config.toml",
         ],
         "JavaScript Library": [
-            "package.json", "src/", "lib/",
-            "dist/", "rollup.config", "webpack.config",
+            "package.json",
+            "src/",
+            "lib/",
+            "dist/",
+            "rollup.config",
+            "webpack.config",
         ],
         "UI Component Library": [
-            "package.json", "components/", "src/",
-            "storybook", "*.stories.",
+            "package.json",
+            "components/",
+            "src/",
+            "storybook",
+            "*.stories.",
         ],
         "Mobile App Framework": [
-            "app.json", "metro.config", "ios/",
-            "android/", "capacitor.config",
+            "app.json",
+            "metro.config",
+            "ios/",
+            "android/",
+            "capacitor.config",
         ],
         "Build Tool": [
-            "webpack.config", "rollup.config", "esbuild",
-            "vite.config", "tsconfig.json", "babel.config",
+            "webpack.config",
+            "rollup.config",
+            "esbuild",
+            "vite.config",
+            "tsconfig.json",
+            "babel.config",
         ],
         "Testing Framework": [
-            "jest.config", "cypress.config", "mocha",
-            ".nycrc", "karma.conf", "playwright.config",
+            "jest.config",
+            "cypress.config",
+            "mocha",
+            ".nycrc",
+            "karma.conf",
+            "playwright.config",
         ],
     }
 
@@ -144,5 +174,6 @@ class JavaScriptClassifier(LanguageClassifier):
             "integration test": 8,
         },
     }
+
 
 JAVASCRIPT = JavaScriptClassifier()

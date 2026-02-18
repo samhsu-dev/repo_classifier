@@ -7,10 +7,13 @@ and predefined weights.
 """
 
 from typing import Dict, Union
+
 from ..utils import _normalize_scores
 
+
 def _classify_description_heuristic(
-    readme_text: str, classifier: Union[str, Dict[str, Dict[str, int]]], 
+    readme_text: str,
+    classifier: Union[str, Dict[str, Dict[str, int]]],
 ) -> Dict[str, float]:
     """Keyword-based fallback classification (internal cascade step).
 

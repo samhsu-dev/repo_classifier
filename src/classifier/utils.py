@@ -58,7 +58,7 @@ def _get_repo_readme(repo_url: str) -> str:
         raise ValueError(f"Invalid GitHub repository URL: {repo_url}")
 
     repo_path = repo_url.replace("https://github.com/", "")
-    parts = repo_path.split('/')
+    parts = repo_path.split("/")
     if len(parts) < 2:
         raise ValueError(f"Invalid repository URL format: {repo_url}")
 
@@ -70,7 +70,7 @@ def _get_repo_readme(repo_url: str) -> str:
         f"https://raw.githubusercontent.com/{owner}/{repo}/master/README",
         f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md",
         f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.rst",
-        f"https://raw.githubusercontent.com/{owner}/{repo}/main/README"
+        f"https://raw.githubusercontent.com/{owner}/{repo}/main/README",
     ]
 
     for url in readme_variants:
@@ -81,4 +81,4 @@ def _get_repo_readme(repo_url: str) -> str:
         except requests.RequestException:
             continue
 
-    raise ValueError(f"README not found for repository: {repo_url}") 
+    raise ValueError(f"README not found for repository: {repo_url}")
