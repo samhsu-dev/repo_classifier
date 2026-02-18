@@ -28,21 +28,16 @@ pip install -e .
 
 ```
 repo_classifier/
-├── classifier/
-│   ├── __init__.py           # Exports public API
-│   ├── core.py               # Core interfaces
-│   ├── utils.py              # Utility functions
-│   ├── registry.py           # Classifier configuration registry
-│   ├── readme/               # README processing module
-│   │   ├── __init__.py
-│   │   ├── fetcher.py        # README fetching functionality
-│   │   ├── heuristic.py      # Heuristic classification logic
-│   │   └── ai_classifier.py  # AI classification logic
-│   └── predefine/            # Built-in classifiers
-│       ├── __init__.py
-│       ├── php.py
-│       ├── python.py
-│       └── javascript.py
+├── src/
+│   └── repo_classifier/      # Package (import repo_classifier)
+│       ├── __init__.py       # Exports public API
+│       ├── core.py           # Core interfaces
+│       ├── utils.py          # Utility functions
+│       ├── registry.py       # Classifier configuration registry
+│       ├── description/      # README classification (heuristic, aimodel)
+│       ├── evaluation.py     # Ground truth and evaluation
+│       ├── file_type.py      # File-type inference
+│       └── predefine/        # Built-in classifiers (php, python, javascript)
 ├── examples/                 # Example scripts
 ├── tests/                    # Test directory
 ├── setup.py                  # Installation configuration
@@ -190,7 +185,7 @@ pip install -e ".[dev]"
 pytest
 
 # Run tests with coverage
-pytest --cov=classifier
+pytest --cov=repo_classifier
 ```
 
 ## License
