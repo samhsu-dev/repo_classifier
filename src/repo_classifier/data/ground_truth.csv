@@ -49,4 +49,30 @@ https://github.com/roundcube/roundcubemail,Web App,Webmail client
 https://github.com/matomo-org/matomo,Web App,Web analytics platform
 https://github.com/nextcloud/server,Web App,File sharing and collaboration platform
 https://github.com/owncloud/core,Web App,File sharing platform
-https://github.com/php/php-src,PHP-SRC,PHP language source code 
+https://github.com/php/php-src,PHP-SRC,PHP language source code
+https://github.com/monicahq/monica,Web App,Personal CRM
+https://github.com/bookstackapp/bookstack,Web App,Wiki and documentation platform
+https://github.com/kanboard/kanboard,Web App,Kanban board
+https://github.com/suitecrm/suitecrm,Web App,CRM platform
+https://github.com/wallabag/wallabag,Web App,Read-it-later and bookmarking
+https://github.com/getgrav/grav,Web App,Flat-file CMS
+https://github.com/octobercms/october,Web App,CMS built on Laravel
+https://github.com/passbolt/passbolt_api,Web App,Password manager
+https://github.com/LycheeOrg/Lychee,Web App,Photo management
+https://github.com/mezzio/mezzio,Framework,PSR-15 middleware micro framework
+https://github.com/flightphp/framework,Framework,PHP micro framework
+https://github.com/Seldaek/monolog,Library,Logging library
+https://github.com/ramsey/uuid,Library,UUID generation
+https://github.com/PHPMailer/PHPMailer,Library,Email library
+https://github.com/PhpSpreadsheet/PhpSpreadsheet,Library,Spreadsheet library
+https://github.com/predis/predis,Library,Redis client for PHP
+https://github.com/twigphp/Twig,Library,Template engine
+https://github.com/elastic/elasticsearch-php,Library,Elasticsearch client
+https://github.com/doctrine/dbal,Library,Database abstraction layer
+https://github.com/thephpleague/csv,Library,CSV read and write
+https://github.com/FriendsOfPHP/PHP-CS-Fixer,CLI App,Code style fixer
+https://github.com/rectorphp/rector,CLI App,PHP refactoring tool
+https://github.com/vimeo/psalm,CLI App,Static analysis for PHP
+https://github.com/infection/infection,CLI App,Mutation testing framework
+https://github.com/phpmd/phpmd,CLI App,PHP Mess Detector
+https://github.com/squizlabs/PHP_CodeSniffer,CLI App,Coding standard enforcement

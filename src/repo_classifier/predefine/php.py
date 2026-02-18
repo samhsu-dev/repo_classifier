@@ -12,51 +12,30 @@ class PHPClassifier(LanguageClassifier):
 
     name = "php"
 
+    # Only files that imply the project *is* this type (not just "uses" the tool). Unique per type.
     file_patterns = {
         "Web App": [
-            "index.php",
-            "public/index.php",
-            ".htaccess",
-            "wp-config.php",
-            "config.php",
-            "routes/web.php",
+            "wp-config.php",  # WordPress app config; unique to WP
         ],
         "Framework": [
-            "artisan",
-            "composer.json",
-            "symfony.lock",
-            "config/app.php",
-            "bootstrap/app.php",
+            "symfony.lock",  # Symfony lockfile
+            "config/app.php",  # Laravel app config
+            "bootstrap/app.php",  # Laravel bootstrap
         ],
         "Framework Plugin": [
-            "plugin.php",
-            "wp-content/plugins",
-            "modules/",
-            "drupal.info",
+            "plugin.php",  # WordPress plugin header file
+            "drupal.info",  # Drupal module/theme info
+            "wp-content/plugins",  # WordPress plugins dir
         ],
         "Framework Theme": [
-            "style.css",
-            "functions.php",
-            "theme.json",
-            "templates/",
-            "wp-content/themes",
+            "theme.json",  # WordPress block theme config
+            "style.css",  # WordPress theme stylesheet header
+            "wp-content/themes",  # WordPress themes dir
         ],
-        "Library": [
-            "composer.json",
-            "src/",
-            "vendor/",
-            "phpunit.xml",
-            "phpstan.neon",
-        ],
-        "CLI App": [
-            "bin/",
-            "console",
-            "artisan",
-        ],
+        "Library": [],  # No file unique to libs only (composer.json shared with apps)
+        "CLI App": [],  # No file unique to CLI only
         "PHP-SRC": [
-            "Zend/",
-            "php-src",
-            "main/php.h",
+            "main/php.h",  # PHP C source tree header
         ],
     }
 

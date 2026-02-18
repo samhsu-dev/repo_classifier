@@ -12,58 +12,18 @@ class PythonClassifier(LanguageClassifier):
 
     name = "python"
 
+    # Only files that imply the project *is* this type (not just "uses" the tool). E.g. pytest.ini = uses testing ≠ is Testing Tool.
     file_patterns = {
-        "Web Framework": [
-            "manage.py",
-            "wsgi.py",
-            "asgi.py",
-            "django/",
-            "flask",
-            "fastapi",
-        ],
-        "Data Science": [
-            "requirements.txt",
-            "environment.yml",
-            "notebooks/",
-            "jupyter",
-            "setup.py",
-        ],
-        "CLI Tool": [
-            "setup.py",
-            "pyproject.toml",
-            "main.py",
-            "cli.py",
-            "__main__.py",
-        ],
-        "Library/Package": [
-            "setup.py",
-            "pyproject.toml",
-            "src/",
-            "setup.cfg",
-            "MANIFEST.in",
-        ],
+        "Web Framework": [],  # No file that implies project is a web framework
+        "Data Science": [],  # environment.yml/.ipynb = uses conda/notebooks, not necessarily a DS project
+        "CLI Tool": [],
+        "Library/Package": [],
         "Web Scraping": [
-            "scrapy.cfg",
-            "scrapy",
-            "spiders/",
+            "scrapy.cfg",  # Scrapy project ⇒ project is a scraping/crawler project
         ],
-        "API/Backend": [
-            "main.py",
-            "app.py",
-            "api/",
-        ],
-        "Desktop Application": [
-            "main.py",
-            "ui/",
-            "gui/",
-        ],
-        "Testing Tool": [
-            "pytest.ini",
-            "conftest.py",
-            "tests/",
-            "tox.ini",
-            ".coveragerc",
-        ],
+        "API/Backend": [],  # openapi/swagger = documents API, not necessarily "is API backend project"
+        "Desktop Application": [],
+        "Testing Tool": [],  # pytest/tox/coveragerc = uses testing tools, not "is a testing tool project"
     }
 
     project_types = {

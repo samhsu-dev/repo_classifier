@@ -12,69 +12,30 @@ class JavaScriptClassifier(LanguageClassifier):
 
     name = "javascript"
 
+    # Only files that imply the project *is* this type (not just "uses" the tool). E.g. jest.config = uses testing ≠ is Testing Framework project.
     file_patterns = {
         "Frontend Framework": [
-            "package.json",
-            "src/App.js",
-            "src/App.jsx",
-            "src/App.tsx",
-            "vite.config",
-            "next.config",
-            "nuxt.config",
+            "next.config",  # Next.js app ⇒ frontend app
+            "nuxt.config",  # Nuxt app ⇒ frontend app
+            "vite.config",  # Vite app ⇒ frontend app
+            "vue.config",  # Vue CLI app ⇒ frontend app
         ],
         "Node.js Backend": [
-            "package.json",
-            "index.js",
-            "server.js",
-            "app.js",
-            "express",
-            "koa",
+            "nest-cli.json",  # NestJS project ⇒ backend app
         ],
         "Static Site Generator": [
-            "package.json",
-            "gatsby-config",
-            "next.config",
-            "nuxt.config",
-            "config.toml",
+            "gatsby-config",  # Gatsby project ⇒ SSG
+            "eleventy.config",  # Eleventy project ⇒ SSG
         ],
-        "JavaScript Library": [
-            "package.json",
-            "src/",
-            "lib/",
-            "dist/",
-            "rollup.config",
-            "webpack.config",
-        ],
-        "UI Component Library": [
-            "package.json",
-            "components/",
-            "src/",
-            "storybook",
-            "*.stories.",
-        ],
+        "JavaScript Library": [],
+        "UI Component Library": [],  # .storybook = uses Storybook for docs, not necessarily "is component library"
         "Mobile App Framework": [
-            "app.json",
-            "metro.config",
-            "ios/",
-            "android/",
-            "capacitor.config",
+            "app.json",  # Expo/RN app config ⇒ mobile app project
+            "metro.config",  # React Native ⇒ mobile app
+            "capacitor.config",  # Capacitor ⇒ mobile/hybrid app
         ],
-        "Build Tool": [
-            "webpack.config",
-            "rollup.config",
-            "esbuild",
-            "vite.config",
-            "tsconfig.json",
-            "babel.config",
-        ],
-        "Testing Framework": [
-            "jest.config",
-            "cypress.config",
-            "mocha",
-            ".nycrc",
-            "karma.conf",
-            "playwright.config",
-        ],
+        "Build Tool": [],  # parcel.config = uses Parcel, not "is a build tool project"
+        "Testing Framework": [],  # jest/cypress/playwright = uses testing, not "is a testing framework project"
     }
 
     project_types = {
