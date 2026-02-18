@@ -8,12 +8,12 @@
 - Classification entry points: `classify_repository_heuristic()`, `classify_repository_aimodel()`
 - Classifier management: `register_classifier()`, `get_classifier()`, `get_available_classifiers()`, `unregister_classifier()`, `load_classifier_from_module()`, `create_classifier_from_file()`
 - Ground truth management: `load_ground_truth()`, `save_ground_truth()`, `get_ground_truth_repos()`, `add_ground_truth_entry()`, `evaluate_classifier()`
-- Configuration constants: `CLASSIFIER_NAMES`, `ALL_PROJECT_TYPES`, `DFT_PROJECT_TYPE_NAMES`
+- Predefined classifiers: `CLASSIFIERS` (singleton with `.php`, `.python`, `.javascript`, `.names()`), `PHP`, `PYTHON`, `JAVASCRIPT` (LanguageClassifier instances). Legacy: `CLASSIFIER_NAMES`, `ALL_PROJECT_TYPES`, `DFT_PROJECT_TYPE_NAMES` (derived from CLASSIFIERS).
 
 **Internal API (single underscore prefix):**
 - Low-level classifiers: `_classify_description_heuristic()`, `_classify_description_aimodel()`
 - Utilities: `_get_repo_readme()`, `_normalize_scores()`, `_get_top_n_scores()`
-- File patterns: `PHP_FILE_PATTERNS`, `PYTHON_FILE_PATTERNS`, `JAVASCRIPT_FILE_PATTERNS` (in predefine php.py, python.py, javascript.py)
+- Predefine: `LanguageClassifier` ABC in `predefine/base.py`; concrete subclasses in `predefine/php.py`, `python.py`, `javascript.py` with class attributes `name`, `project_types`, `file_patterns`. File-type inference uses these via internal `_FILE_TYPE_PATTERNS` (built from CLASSIFIERS).
 
 **Private Implementation (double underscore prefix, never exposed):**
 - File type inference: `__classify_by_file_type()` — Used only by cascade pipeline internally
@@ -32,7 +32,7 @@
 
 ### Public API
 
-#### `classify_repository_heuristic(repo_url: str, classifier: Union[str, Dict], top_n: int = 3) -> Dict[str, float]`
+#### `classify_repository_heuristic(repo_url: str, classifier: Union[str, Dict[str, Dict[str, int]], LanguageClassifier], top_n: int = 3) -> Dict[str, float]`
 
 Responsibility: Main entry point implementing cascade pipeline (Ground Truth → File Type → Heuristic).
 
@@ -40,14 +40,14 @@ Behavior:
 1. Validate inputs (URL, classifier, top_n)
 2. Check ground truth (highest priority); if found, return {type: 1.0}
 3. Fetch README content (only if ground truth check fails)
-4. Attempt file-type inference via internal file-type classifier
+4. Attempt file-type inference via internal file-type classifier (when classifier is a LanguageClassifier or resolved by name)
 5. If file result has confidence >= 0.7, return immediately
 6. Otherwise, fall back to heuristic classification
 7. Apply top-N filtering and return
 
 Input:
 - `repo_url`: GitHub repository URL (non-empty string)
-- `classifier`: Classifier name (str) or config dict (non-empty)
+- `classifier`: LanguageClassifier instance (e.g. `PHP`, `CLASSIFIERS.php`), classifier name (str), or inline config dict (non-empty)
 - `top_n`: Positive integer for result count (default: 3)
 
 Output: `Dict[str, float]` — top-N project types to scores (0.0–1.0)
@@ -56,10 +56,10 @@ Errors: Raises `ValueError` for invalid parameters.
 
 Example:
 ```python
-from classifier import classify_repository_heuristic, CLASSIFIER_NAMES
+from classifier import classify_repository_heuristic, PHP
 results = classify_repository_heuristic(
     "https://github.com/laravel/laravel",
-    CLASSIFIER_NAMES.PHP,
+    PHP,  # or CLASSIFIERS.php or "php"
     top_n=3
 )
 # {"Framework": 0.95, "Web App": 0.04, "Library": 0.01}
@@ -67,7 +67,7 @@ results = classify_repository_heuristic(
 
 ---
 
-#### `classify_repository_aimodel(repo_url: str, classifier: Union[str, List[str]], api_url: str, model_name: str, api_key: str, top_n: int = 3, temperature: float = 0.1, max_in_tokens: Optional[int] = None, max_out_tokens: Optional[int] = None, timeout: int = 60) -> Dict[str, float]`
+#### `classify_repository_aimodel(repo_url: str, classifier: Union[str, List[str], LanguageClassifier], model_name: str, api_key: str, top_n: int = 3, temperature: float = 0.1, timeout: int = 60) -> Dict[str, float]`
 
 Responsibility: LLM-based classification path using cascade pipeline (Ground Truth → File Type → LLM).
 
@@ -81,14 +81,11 @@ Behavior:
 
 Input:
 - `repo_url`: GitHub repository URL
-- `classifier`: Classifier name or list of project types
-- `api_url`: LLM service endpoint
-- `model_name`: LLM model identifier (e.g., "gpt-4o", "claude-3-opus-20240229", "gemini-2.0-flash")
+- `classifier`: LanguageClassifier (e.g. `CLASSIFIERS.python`), classifier name (str), or list of project type names
+- `model_name`: LLM model identifier (e.g., "gpt-4o", "claude-3-opus-20240229")
 - `api_key`: API credentials
 - `top_n`: Number of top results (default: 3)
 - `temperature`: LLM randomness 0.0–1.0 (default: 0.1)
-- `max_in_tokens`: Input token limit (optional, not all providers support)
-- `max_out_tokens`: Output token limit (optional, not all providers support)
 - `timeout`: Request timeout in seconds (default: 60)
 
 Output: `Dict[str, float]` — project types to scores (0.0–1.0)
@@ -97,11 +94,10 @@ Errors: Raises `ValueError` for invalid params, network failures, or JSON parse 
 
 Example:
 ```python
-from classifier import classify_repository_aimodel
+from classifier import classify_repository_aimodel, CLASSIFIERS
 results = classify_repository_aimodel(
     "https://github.com/django/django",
-    ["Web Framework", "Library", "Tool"],
-    api_url="https://api.openai.com",
+    CLASSIFIERS.python,  # or ["Web Framework", "Library", "Tool"] or "python"
     model_name="gpt-4o",
     api_key="sk-...",
 )
@@ -279,9 +275,9 @@ Output: Dict with at most N entries sorted by score descending
 
 ---
 
-#### File patterns (PHP_FILE_PATTERNS, PYTHON_FILE_PATTERNS, JAVASCRIPT_FILE_PATTERNS)
+#### File patterns (LanguageClassifier.file_patterns)
 
-Data: Each language module (predefine/php.py, python.py, javascript.py) defines a `*_FILE_PATTERNS` dict mapping project type names to lists of file/path pattern strings. file_type.py builds an internal mapping from these for `__classify_by_file_type()`.
+Data: Each concrete LanguageClassifier (PHPClassifier, PythonClassifier, JavaScriptClassifier) defines class attribute `file_patterns`: a dict mapping project type names to lists of file/path pattern strings. The predefine module exposes a single `_FILE_TYPE_PATTERNS` (name → file_patterns) built from CLASSIFIERS; file_type.py uses it in `__classify_by_file_type()`.
 
 ---
 
@@ -293,7 +289,7 @@ Responsibility: File-pattern-based type inference step in cascade pipeline.
 
 Behavior: Extract tokens, score types, return highest or None if low confidence
 
-Usage: Called only by `classify_repository_heuristic()` internally
+Usage: Called by `classify_repository_heuristic()` and `classify_repository_aimodel()` internally
 
 Note: NOT exposed in public API; uses `__` prefix for name mangling
 
@@ -323,7 +319,7 @@ Note: NOT exposed in public API; uses `__` prefix for name mangling
 - `top_n` must be positive integer
 
 **classify_repository_aimodel:**
-- `repo_url`, `classifier`, `api_url`, `model_name`, `api_key` must be non-empty
+- `repo_url`, `classifier`, `model_name`, `api_key` must be non-empty
 - `top_n` must be positive integer
 - `temperature` must be in [0.0, 1.0]
 - `timeout` must be positive integer
