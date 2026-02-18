@@ -30,9 +30,13 @@ from .evaluation import (
 )
 
 from .predefine import (
+    CLASSIFIERS,
     CLASSIFIER_NAMES,
     ALL_PROJECT_TYPES,
     DFT_PROJECT_TYPE_NAMES,
+    PHP,
+    PYTHON,
+    JAVASCRIPT,
 )
 
 __all__ = [
@@ -58,8 +62,12 @@ __all__ = [
     'add_ground_truth_entry',
     'get_ground_truth_repos',
 
-    # Predefined configuration constants
+    # Predefined: singleton + property (prefer CLASSIFIERS.php, CLASSIFIERS.names())
+    'CLASSIFIERS',
     'CLASSIFIER_NAMES',
     'ALL_PROJECT_TYPES',
     'DFT_PROJECT_TYPE_NAMES',
+    'PHP',
+    'PYTHON',
+    'JAVASCRIPT',
 ]

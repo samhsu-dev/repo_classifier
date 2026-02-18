@@ -9,6 +9,7 @@ from .registry import get_classifier, get_available_classifiers
 from .utils import _get_top_n_scores, _get_repo_readme
 from .description import _classify_description_heuristic, _classify_description_aimodel
 from .predefine import DFT_PROJECT_TYPE_NAMES
+from .predefine.base import LanguageClassifier
 from .evaluation import get_ground_truth_repos
 from .file_type import __classify_by_file_type
 
@@ -22,7 +23,7 @@ FILE_TYPE_CONFIDENCE_THRESHOLD = 0.7
 
 def classify_repository_heuristic(
     repo_url: str,
-    classifier: Union[str, Dict[str, Dict[str, int]]],
+    classifier: Union[str, Dict[str, Dict[str, int]], LanguageClassifier],
     top_n: int = 3,
 ) -> Dict[str, float]:
     """Classify a GitHub repository using cascade pipeline.
@@ -34,7 +35,7 @@ def classify_repository_heuristic(
 
     Args:
         repo_url: GitHub repository URL.
-        classifier: Classifier name or configuration dict.
+        classifier: Classifier name, configuration dict, or LanguageClassifier (e.g. CLASSIFIERS.php).
         top_n: Number of top types to return. Must be positive.
 
     Returns:
@@ -50,15 +51,12 @@ def classify_repository_heuristic(
     if top_n <= 0:
         raise ValueError("top_n must be a positive integer")
 
-    # Step 1: Check ground truth (highest priority)
-    if classifier in DFT_PROJECT_TYPE_NAMES:
-        ground_truth = get_ground_truth_repos()
-        true_type = ground_truth.get(repo_url)
-        if true_type:
-            return {true_type: 1.0}
-
-    # Resolve classifier to config if it's a string
-    if isinstance(classifier, str):
+    # Normalize: LanguageClassifier -> name + config
+    if isinstance(classifier, LanguageClassifier):
+        classifier_name = classifier.name
+        config = classifier.project_types
+    elif isinstance(classifier, str):
+        classifier_name = classifier
         config = get_classifier(classifier)
         if not config:
             available = get_available_classifiers()
@@ -66,10 +64,16 @@ def classify_repository_heuristic(
                 f"Classifier not found: {classifier}. "
                 f"Available classifiers: {', '.join(available)}"
             )
-        classifier_name = classifier
     else:
-        config = classifier
         classifier_name = None
+        config = classifier
+
+    # Step 1: Check ground truth (highest priority)
+    if classifier_name and classifier_name in DFT_PROJECT_TYPE_NAMES:
+        ground_truth = get_ground_truth_repos()
+        true_type = ground_truth.get(repo_url)
+        if true_type:
+            return {true_type: 1.0}
 
     # Step 2: Get README
     readme_text = _get_repo_readme(repo_url)
@@ -86,7 +90,7 @@ def classify_repository_heuristic(
 
 def classify_repository_aimodel(
     repo_url: str,
-    classifier: Union[str, List[str]],
+    classifier: Union[str, List[str], LanguageClassifier],
     api_url: str,
     model_name: str,
     api_key: str,
@@ -131,8 +135,16 @@ def classify_repository_aimodel(
     if not model_name:
         raise ValueError("Model name cannot be empty")
 
+    # Normalize: LanguageClassifier -> name + project_type_names list
+    if isinstance(classifier, LanguageClassifier):
+        _name = classifier.name
+        _project_types = classifier.project_type_names
+    else:
+        _name = classifier if isinstance(classifier, str) else None
+        _project_types = classifier
+
     # Step 1: Check ground truth
-    if isinstance(classifier, str) and classifier in DFT_PROJECT_TYPE_NAMES:
+    if _name and _name in DFT_PROJECT_TYPE_NAMES:
         ground_truth = get_ground_truth_repos()
         true_type = ground_truth.get(repo_url)
         if true_type:
@@ -142,15 +154,15 @@ def classify_repository_aimodel(
     readme_text = _get_repo_readme(repo_url)
 
     # Step 3: Try file-type inference
-    if isinstance(classifier, str):
-        file_result = __classify_by_file_type(readme_text, classifier)
+    if _name:
+        file_result = __classify_by_file_type(readme_text, _name)
         if file_result and file_result[1] >= FILE_TYPE_CONFIDENCE_THRESHOLD:
             return {file_result[0]: file_result[1]}
 
     # Step 4: Fall back to LLM classification
     scores = _classify_description_aimodel(
         readme_text=readme_text,
-        classifier=classifier,
+        classifier=_project_types,
         model_name=model_name,
         api_key=api_key,
         temperature=temperature,

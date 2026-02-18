@@ -10,7 +10,7 @@ import re
 from typing import Dict, List, Optional, Tuple
 
 from .utils import _normalize_scores
-from .predefine.file_patterns import _FILE_TYPE_PATTERNS
+from .predefine import _FILE_TYPE_PATTERNS
 
 _TOKEN_RE = re.compile(
     r"""
