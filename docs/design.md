@@ -56,7 +56,7 @@ Errors: Raises `ValueError` for invalid parameters.
 
 Example:
 ```python
-from classifier import classify_repository_heuristic, PHP
+from repo_classifier import classify_repository_heuristic, PHP
 results = classify_repository_heuristic(
     "https://github.com/laravel/laravel",
     PHP,  # or CLASSIFIERS.php or "php"
@@ -94,7 +94,7 @@ Errors: Raises `ValueError` for invalid params, network failures, or JSON parse 
 
 Example:
 ```python
-from classifier import classify_repository_aimodel, CLASSIFIERS
+from repo_classifier import classify_repository_aimodel, CLASSIFIERS
 results = classify_repository_aimodel(
     "https://github.com/django/django",
     CLASSIFIERS.python,  # or ["Web Framework", "Library", "Tool"] or "python"

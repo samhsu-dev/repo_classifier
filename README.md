@@ -55,7 +55,7 @@ repo_classifier/
 ### Basic Usage
 
 ```python
-from classifier import classify_repository_heuristic, CLASSIFIER_NAMES
+from repo_classifier import classify_repository_heuristic, CLASSIFIER_NAMES
 
 # Use built-in PHP classifier
 results = classify_repository_heuristic(
@@ -82,7 +82,7 @@ print(results)  # {"Frontend Framework": 0.88, "JavaScript Library": 0.40}
 ### Using AI Classification
 
 ```python
-from classifier import classify_repository_aimodel, CLASSIFIER_NAMES
+from repo_classifier import classify_repository_aimodel, CLASSIFIER_NAMES
 
 # Use AI classification with built-in PHP project types
 results = classify_repository_aimodel(
@@ -99,7 +99,7 @@ print(results)
 The `CLASSIFIER_NAMES` object provides a convenient way to access the built-in classifier names:
 
 ```python
-from classifier import CLASSIFIER_NAMES
+from repo_classifier import CLASSIFIER_NAMES
 
 # Access individual classifier names
 php_classifier = CLASSIFIER_NAMES.PHP       # "php"
@@ -116,7 +116,7 @@ available = CLASSIFIER_NAMES.available()    # ["php", "python", "javascript"]
 ### Custom Classifier Definition
 
 ```python
-from classifier import classify_repository_heuristic, register_classifier
+from repo_classifier import classify_repository_heuristic, register_classifier
 
 # Define custom classifier
 custom_config = {
@@ -148,7 +148,7 @@ print(results)
 ### Loading Classifiers from Python Modules
 
 ```python
-from classifier import load_classifier_from_module, classify_repository_heuristic
+from repo_classifier import load_classifier_from_module, classify_repository_heuristic
 
 # Import classifiers from a module
 load_classifier_from_module("path/to/my_classifiers.py")
@@ -164,7 +164,7 @@ print(results)
 ### Creating Classifiers from Text Files
 
 ```python
-from classifier import create_classifier_from_file, register_classifier
+from repo_classifier import create_classifier_from_file, register_classifier
 
 # Create classifier from text file
 game_dev_config = create_classifier_from_file("path/to/game_dev.txt")
