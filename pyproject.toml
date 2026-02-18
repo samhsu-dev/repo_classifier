@@ -8,7 +8,7 @@ version = "0.1.4"
 description = "A library for classifying GitHub repositories"
 readme = "README.md"
 authors = [
-    {name = "Sam Hsu", email = "yxu166@jhu.edu"}
+    {name = "samhsu-dev", email = "yxu166@jhu.edu"}
 ]
 license = {text = "MIT"}
 classifiers = [
@@ -16,14 +16,14 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "requests>=2.25.0",
 ]
 
 [dependency-groups]
 dev = [
-    "litellm>=1.0.0",
+    "litellm>=1.81.0",
     "python-dotenv>=1.0.0",
     "pytest>=6.0.0",
     "pytest-cov>=2.10.0",
