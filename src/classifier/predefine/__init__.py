@@ -1,41 +1,72 @@
 """
 Project type classifiers module.
 
-This module exports all built-in project type configurations.
+Uses singleton + property: one list of LanguageClassifier instances drives
+all derived data. To add a language: add a LanguageClassifier instance and
+append it to the list in _BuiltinClassifiers._classifiers.
 """
 
-# Import all configurations directly (no try/except)
-from .php import PHP_PROJECT_TYPES, PHP_PROJECT_TYPE_NAMES
-from .python import PYTHON_PROJECT_TYPES, PYTHON_PROJECT_TYPE_NAMES
-from .javascript import JAVASCRIPT_PROJECT_TYPES, JAVASCRIPT_PROJECT_TYPE_NAMES
+from typing import Dict, List
 
-# Merge all configurations to create a complete mapping
-ALL_PROJECT_TYPES = {
-    "php": PHP_PROJECT_TYPES,
-    "python": PYTHON_PROJECT_TYPES,
-    "javascript": JAVASCRIPT_PROJECT_TYPES
-}
+from .base import LanguageClassifier
+from .php import PHP
+from .python import PYTHON
+from .javascript import JAVASCRIPT
 
-# Export all project type names
-DFT_PROJECT_TYPE_NAMES = {
-    "php": PHP_PROJECT_TYPE_NAMES,
-    "python": PYTHON_PROJECT_TYPE_NAMES,
-    "javascript": JAVASCRIPT_PROJECT_TYPE_NAMES
-}
 
-# Define a constant object for classifier names
+class _BuiltinClassifiers:
+    """Singleton holding built-in language classifiers. All data via properties."""
+
+    def __init__(self) -> None:
+        self._classifiers: List[LanguageClassifier] = [PHP, PYTHON, JAVASCRIPT]
+
+    @property
+    def all_project_types(self) -> Dict[str, Dict[str, Dict[str, int]]]:
+        return {c.name: c.project_types for c in self._classifiers}
+
+    @property
+    def dft_project_type_names(self) -> Dict[str, List[str]]:
+        return {c.name: c.project_type_names for c in self._classifiers}
+
+    @property
+    def file_type_patterns(self) -> Dict[str, Dict[str, List[str]]]:
+        return {c.name: c.file_patterns for c in self._classifiers}
+
+    def names(self) -> List[str]:
+        return [c.name for c in self._classifiers]
+
+    @property
+    def php(self) -> LanguageClassifier:
+        return PHP
+
+    @property
+    def python(self) -> LanguageClassifier:
+        return PYTHON
+
+    @property
+    def javascript(self) -> LanguageClassifier:
+        return JAVASCRIPT
+
+
+CLASSIFIERS = _BuiltinClassifiers()
+
+# Derived from singleton (no standalone constants). Registry/core/file_type use these.
+ALL_PROJECT_TYPES = CLASSIFIERS.all_project_types
+DFT_PROJECT_TYPE_NAMES = CLASSIFIERS.dft_project_type_names
+_FILE_TYPE_PATTERNS = CLASSIFIERS.file_type_patterns
+
+
 class CLASSIFIER_NAMES:
-    """Constant object containing all default classifier names."""
-    PHP = "php"
-    PYTHON = "python"
-    JAVASCRIPT = "javascript"
-    
+    """Backward-compat: string names and helpers. Prefer CLASSIFIERS.php.name, CLASSIFIERS.names()."""
+
+    PHP = CLASSIFIERS.php.name
+    PYTHON = CLASSIFIERS.python.name
+    JAVASCRIPT = CLASSIFIERS.javascript.name
+
     @classmethod
-    def all(cls) -> list:
-        """Return a list of all available default classifier names."""
-        return [cls.PHP, cls.PYTHON, cls.JAVASCRIPT]
-    
+    def all(cls) -> List[str]:
+        return CLASSIFIERS.names()
+
     @classmethod
-    def available(cls) -> list:
-        """Return a list of actually available classifier names."""
-        return list(ALL_PROJECT_TYPES.keys())
+    def available(cls) -> List[str]:
+        return list(CLASSIFIERS.all_project_types.keys())
