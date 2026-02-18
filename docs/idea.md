@@ -86,7 +86,7 @@ The Repository Classifier is a library that serves as the central classification
 
 - **Top-N Selection** - Filtering mechanism that returns only the N highest-confidence project types, reducing noise and focusing results on the most likely classifications.
 
-- **File-Type Pattern** - A mapping from project types to lists of characteristic file names and path fragments (e.g., `composer.json`, `manage.py`, `package.json`). When these tokens appear in README text, they strongly suggest the corresponding project type. Patterns are language-specific and defined in the `predefine.file_patterns` module.
+- **File-Type Pattern** - A mapping from project types to lists of characteristic file names and path fragments (e.g., `composer.json`, `manage.py`, `package.json`). When these tokens appear in README text, they strongly suggest the corresponding project type. Patterns are defined per language in `predefine/php.py` (PHP_FILE_PATTERNS), `predefine/python.py` (PYTHON_FILE_PATTERNS), and `predefine/javascript.py` (JAVASCRIPT_FILE_PATTERNS).
 
 - **Cascade Pipeline** - A priority-based classification strategy where methods are tried in order: Ground Truth (highest priority) → File Type Inference → Heuristic (fallback). Each stage either succeeds and returns a result, or defers to the next stage.
 

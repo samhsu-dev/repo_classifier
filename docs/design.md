@@ -13,7 +13,7 @@
 **Internal API (single underscore prefix):**
 - Low-level classifiers: `_classify_description_heuristic()`, `_classify_description_aimodel()`
 - Utilities: `_get_repo_readme()`, `_normalize_scores()`, `_get_top_n_scores()`
-- File patterns data: `_FILE_TYPE_PATTERNS`
+- File patterns: `PHP_FILE_PATTERNS`, `PYTHON_FILE_PATTERNS`, `JAVASCRIPT_FILE_PATTERNS` (in predefine php.py, python.py, javascript.py)
 
 **Private Implementation (double underscore prefix, never exposed):**
 - File type inference: `__classify_by_file_type()` — Used only by cascade pipeline internally
@@ -279,11 +279,9 @@ Output: Dict with at most N entries sorted by score descending
 
 ---
 
-#### `_FILE_TYPE_PATTERNS: Dict[str, Dict[str, List[str]]]`
+#### File patterns (PHP_FILE_PATTERNS, PYTHON_FILE_PATTERNS, JAVASCRIPT_FILE_PATTERNS)
 
-Data structure: Global unified registry mapping classifier names to project-type file patterns.
-
-Usage: Used internally by `__classify_by_file_type()`
+Data: Each language module (predefine/php.py, python.py, javascript.py) defines a `*_FILE_PATTERNS` dict mapping project type names to lists of file/path pattern strings. file_type.py builds an internal mapping from these for `__classify_by_file_type()`.
 
 ---
 
