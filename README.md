@@ -1,6 +1,6 @@
 # Repository Classifier
 
-A Python library for classifying GitHub repositories using both heuristic keyword-based and AI-powered methods.
+Python library that classifies GitHub repositories by project type using a cascade: Ground Truth → File-type inference → Heuristic or LLM. Built-in classifiers: PHP, Python, JavaScript.
 
 ## Installation
 
@@ -8,185 +8,97 @@ A Python library for classifying GitHub repositories using both heuristic keywor
 pip install repo-classifier
 ```
 
-Or install from source:
+From source (uses [uv](https://docs.astral.sh/uv/)):
 
 ```bash
 git clone https://github.com/samhsu-dev/repo_classifier.git
 cd repo_classifier
-pip install -e .
-```
-
-## Features
-
-- Classify repositories using keyword-based heuristic method
-- Classify repositories using AI services (OpenAI GPT, DeepSeek, etc.)
-- Built-in classifiers for PHP, Python, and JavaScript
-- Extensible system for custom classifiers
-- Multiple ways to define and load classifiers
-
-## Project Structure
-
-```
-repo_classifier/
-├── src/
-│   └── repo_classifier/      # Package (import repo_classifier)
-│       ├── __init__.py       # Exports public API
-│       ├── core.py           # Core interfaces
-│       ├── utils.py          # Utility functions
-│       ├── registry.py       # Classifier configuration registry
-│       ├── description/      # README classification (heuristic, aimodel)
-│       ├── evaluation.py     # Ground truth and evaluation
-│       ├── file_type.py      # File-type inference
-│       └── predefine/        # Built-in classifiers (php, python, javascript)
-├── examples/                 # Example scripts
-├── tests/                    # Test directory
-├── setup.py                  # Installation configuration
-├── requirements.txt          # Dependencies
-└── README.md                 # This file
+uv sync
 ```
 
 ## Usage
 
-### Basic Usage
-
 ```python
-from repo_classifier import classify_repository_heuristic, CLASSIFIER_NAMES
+from repo_classifier import classify_repository_heuristic, classify_repository_aimodel, CLASSIFIERS
 
-# Use built-in PHP classifier
+# Heuristic (keyword + file-type cascade)
 results = classify_repository_heuristic(
-    "https://github.com/user/repo",
-    classifier=CLASSIFIER_NAMES.PHP
+    "https://github.com/laravel/laravel",
+    classifier=CLASSIFIERS.php,  # or "php" or CLASSIFIER_NAMES.PHP
+    top_n=3,
 )
-print(results)  # {"Web App": 0.85, "Framework": 0.45, "Library": 0.30}
+# {"Framework": 0.95, ...}
 
-# Use built-in Python classifier
-results = classify_repository_heuristic(
-    "https://github.com/user/repo",
-    classifier=CLASSIFIER_NAMES.PYTHON
-)
-print(results)  # {"Web Framework": 0.92, "Library/Package": 0.45}
-
-# Use built-in JavaScript classifier
-results = classify_repository_heuristic(
-    "https://github.com/user/repo",
-    classifier=CLASSIFIER_NAMES.JAVASCRIPT
-)
-print(results)  # {"Frontend Framework": 0.88, "JavaScript Library": 0.40}
-```
-
-### Using AI Classification
-
-```python
-from repo_classifier import classify_repository_aimodel, CLASSIFIER_NAMES
-
-# Use AI classification with built-in PHP project types
+# LLM (same cascade, LLM fallback; requires api_key and model_name)
 results = classify_repository_aimodel(
-    "https://github.com/user/repo",
-    api_key="your_api_key",
-    classifier=CLASSIFIER_NAMES.PHP,
-    model_name="gpt-3.5-turbo"
+    "https://github.com/django/django",
+    classifier=CLASSIFIERS.python,
+    model_name="gpt-4o",
+    api_key="sk-...",
 )
-print(results)
 ```
 
-### Using CLASSIFIER_NAMES
+## Advanced usage
 
-The `CLASSIFIER_NAMES` object provides a convenient way to access the built-in classifier names:
+**Custom classifier (inline config)** — register a name → type/weight map, then pass the name to `classify_repository_heuristic` or `classify_repository_aimodel`.
 
 ```python
-from repo_classifier import CLASSIFIER_NAMES
+from repo_classifier import register_classifier, classify_repository_heuristic
 
-# Access individual classifier names
-php_classifier = CLASSIFIER_NAMES.PHP       # "php"
-python_classifier = CLASSIFIER_NAMES.PYTHON # "python"
-js_classifier = CLASSIFIER_NAMES.JAVASCRIPT # "javascript"
-
-# Get a list of all classifier names
-all_classifiers = CLASSIFIER_NAMES.all()    # ["php", "python", "javascript"]
-
-# Get a list of available classifier names
-available = CLASSIFIER_NAMES.available()    # ["php", "python", "javascript"]
+register_classifier("game", {"Game Engine": {"engine": 10, "game": 8}, "Tool": {"editor": 10}})
+classify_repository_heuristic("https://github.com/...", classifier="game", top_n=2)
 ```
 
-### Custom Classifier Definition
+**Classifier from file or module** — load from a text file or Python module and use by name.
 
 ```python
-from repo_classifier import classify_repository_heuristic, register_classifier
+from repo_classifier import create_classifier_from_file, register_classifier, load_classifier_from_module
 
-# Define custom classifier
-custom_config = {
-    "Web Framework": {
-        "mvc": 10,
-        "web framework": 10,
-        "router": 8,
-        "controller": 8
-    },
-    "API Service": {
-        "api": 10,
-        "rest": 10,
-        "json": 8,
-        "http": 8
-    }
-}
-
-# Register custom classifier
-register_classifier("custom", custom_config)
-
-# Use registered classifier
-results = classify_repository_heuristic(
-    "https://github.com/user/repo",
-    classifier="custom"
-)
-print(results)
+config = create_classifier_from_file("path/to/types.txt")
+register_classifier("my_domain", config)
+# or: load_classifier_from_module("path/to/classifiers.py")  # registers all exports
 ```
 
-### Loading Classifiers from Python Modules
+**LLM with custom type list** — pass a list of project types instead of a built-in classifier; no registration.
 
 ```python
-from repo_classifier import load_classifier_from_module, classify_repository_heuristic
-
-# Import classifiers from a module
-load_classifier_from_module("path/to/my_classifiers.py")
-
-# Use imported classifier
-results = classify_repository_heuristic(
-    "https://github.com/user/repo",
-    classifier="data_science"
+classify_repository_aimodel(
+    "https://github.com/...",
+    classifier=["Web App", "API", "Library", "CLI"],
+    model_name="gpt-4o",
+    api_key="sk-...",
 )
-print(results)
 ```
 
-### Creating Classifiers from Text Files
+**Ground truth and evaluation** — load repo→type mapping from JSON, evaluate a classifier and get accuracy/F1.
 
 ```python
-from repo_classifier import create_classifier_from_file, register_classifier
+from repo_classifier import load_ground_truth, evaluate_classifier
 
-# Create classifier from text file
-game_dev_config = create_classifier_from_file("path/to/game_dev.txt")
-
-# Register classifier
-register_classifier("game_dev", game_dev_config)
-
-# Use registered classifier
-results = classify_repository_heuristic(
-    "https://github.com/user/repo",
-    classifier="game_dev"
-)
-print(results)
+truth = load_ground_truth("path/to/ground_truth.json")  # {"https://github.com/...": "Framework", ...}
+metrics = evaluate_classifier("php", truth)  # {"accuracy": 0.92, "f1": 0.88, ...}
 ```
 
-## Running Tests
+## Documentation
+
+| Doc | Purpose |
+|-----|--------|
+| [docs/demo.ipynb](docs/demo.ipynb) | End-to-end demo; configure via `docs/.env` (see [docs/.env.example](docs/.env.example)) |
+| [docs/idea.md](docs/idea.md) | Concepts, architecture, data flow, cascade pipeline, scenarios |
+| [docs/design.md](docs/design.md) | Public/internal API, validation, errors, cascade behaviour |
+| [docs/impl.md](docs/impl.md) | LLM integration (litellm), prompt and response handling |
+
+## Development
+
+Uses [uv](https://docs.astral.sh/uv/). From the repo root:
 
 ```bash
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run all tests
-pytest
-
-# Run tests with coverage
-pytest --cov=repo_classifier
+uv sync
+uv run pytest
+uv run pytest --cov=repo_classifier
 ```
+
+Lint/format: `uv run black`, `uv run isort`, `uv run mypy`, `uv run pylint` (see `pyproject.toml`).
 
 ## License
 
