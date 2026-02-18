@@ -76,3 +76,73 @@ https://github.com/vimeo/psalm,CLI App,Static analysis for PHP
 https://github.com/infection/infection,CLI App,Mutation testing framework
 https://github.com/phpmd/phpmd,CLI App,PHP Mess Detector
 https://github.com/squizlabs/PHP_CodeSniffer,CLI App,Coding standard enforcement
+
+https://github.com/django/django,Web Framework,Popular Python web framework
+https://github.com/pallets/flask,Web Framework,Lightweight Python web framework
+https://github.com/tiangolo/fastapi,Web Framework,Modern Python API framework
+https://github.com/Pylons/pyramid,Web Framework,Python web framework
+https://github.com/tornadoweb/tornado,Web Framework,Async Python web framework
+https://github.com/bottlepy/bottle,Web Framework,Python micro web framework
+https://github.com/pandas-dev/pandas,Data Science,Data analysis library
+https://github.com/numpy/numpy,Data Science,Numerical computing library
+https://github.com/scikit-learn/scikit-learn,Data Science,Machine learning library
+https://github.com/tensorflow/tensorflow,Data Science,Deep learning framework
+https://github.com/pytorch/pytorch,Data Science,Deep learning framework
+https://github.com/jupyter/notebook,Data Science,Interactive notebook
+https://github.com/psf/requests,Library/Package,HTTP library for Python
+https://github.com/pypa/pip,CLI Tool,Package installer for Python
+https://github.com/psf/black,CLI Tool,Python code formatter
+https://github.com/pytest-dev/pytest,Testing Tool,Testing framework for Python
+https://github.com/pallets/click,Library/Package,CLI library
+https://github.com/celery/celery,Library/Package,Distributed task queue
+https://github.com/benoitc/gunicorn,Library/Package,WSGI HTTP server
+https://github.com/scrapy/scrapy,Web Scraping,Web scraping framework
+https://github.com/encode/httpx,Library/Package,HTTP client for Python
+https://github.com/encode/uvicorn,Library/Package,ASGI server
+https://github.com/sqlalchemy/sqlalchemy,Library/Package,SQL toolkit and ORM
+https://github.com/python/cpython,Library/Package,Python language reference implementation
+https://github.com/marshmallow-code/marshmallow,Library/Package,Object serialization
+https://github.com/pydantic/pydantic,Library/Package,Data validation
+https://github.com/tox-dev/tox,CLI Tool,Automation for testing and packaging
+https://github.com/coveragepy/coverage,Testing Tool,Code coverage measurement
+https://github.com/mitmproxy/mitmproxy,CLI Tool,Interactive HTTPS proxy
+https://github.com/nicolaiarocci/eve,API/Backend,REST API framework
+https://github.com/graphql-python/graphene,Library/Package,GraphQL for Python
+https://github.com/streamlit/streamlit,Web Framework,Data app framework
+https://github.com/ray-project/ray,Library/Package,Distributed computing
+https://github.com/apache/airflow,CLI Tool,Workflow orchestration
+https://github.com/pre-commit/pre-commit,CLI Tool,Pre-commit hook manager
+
+https://github.com/facebook/react,Frontend Framework,UI library for web
+https://github.com/vuejs/core,Frontend Framework,Progressive JavaScript framework
+https://github.com/angular/angular,Frontend Framework,Web application framework
+https://github.com/vercel/next.js,Frontend Framework,React framework with SSR
+https://github.com/nuxt/nuxt,Frontend Framework,Vue framework
+https://github.com/sveltejs/svelte,Frontend Framework,Compiled UI framework
+https://github.com/expressjs/express,Node.js Backend,Web framework for Node
+https://github.com/nestjs/nest,Node.js Backend,Node.js enterprise framework
+https://github.com/fastify/fastify,Node.js Backend,Fast Node.js web framework
+https://github.com/koajs/koa,Node.js Backend,Node.js web framework
+https://github.com/gatsbyjs/gatsby,Static Site Generator,React-based SSG
+https://github.com/11ty/eleventy,Static Site Generator,Static site generator
+https://github.com/lodash/lodash,JavaScript Library,Utility library
+https://github.com/axios/axios,JavaScript Library,HTTP client
+https://github.com/moment/moment,JavaScript Library,Date library
+https://github.com/date-fns/date-fns,JavaScript Library,Date utility library
+https://github.com/facebook/jest,Testing Framework,JavaScript testing framework
+https://github.com/cypress-io/cypress,Testing Framework,E2E testing
+https://github.com/mochajs/mocha,Testing Framework,JavaScript test framework
+https://github.com/webpack/webpack,Build Tool,Module bundler
+https://github.com/rollup/rollup,Build Tool,JavaScript module bundler
+https://github.com/vitejs/vite,Build Tool,Frontend build tool
+https://github.com/parcel-bundler/parcel,Build Tool,Web application bundler
+https://github.com/facebook/react-native,Mobile App Framework,Cross-platform mobile framework
+https://github.com/expo/expo,Mobile App Framework,React Native platform
+https://github.com/ionic-team/ionic-framework,Mobile App Framework,Cross-platform mobile UI
+https://github.com/mui/material-ui,UI Component Library,Material Design React components
+https://github.com/ant-design/ant-design,UI Component Library,React UI library
+https://github.com/chakra-ui/chakra-ui,UI Component Library,React component library
+https://github.com/tailwindlabs/tailwindcss,UI Component Library,Utility-first CSS framework
+https://github.com/TypeScript/TypeScript,JavaScript Library,Typed JavaScript
+https://github.com/nodejs/node,Node.js Backend,JavaScript runtime
+https://github.com/electron/electron,Desktop Application,Cross-platform desktop apps
